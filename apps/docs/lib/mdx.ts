@@ -1,7 +1,7 @@
-import { type EvaluateOptions, evaluate } from '@mdx-js/mdx';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { type EvaluateOptions, evaluate } from '@mdx-js/mdx';
 import matter from 'gray-matter';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactElement } from 'react';
