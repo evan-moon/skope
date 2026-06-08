@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bgglow" cx="50%" cy="32%" r="60%">
+      <stop offset="0%"   stop-color="#38bdf8" stop-opacity="0.10"/>
+      <stop offset="55%"  stop-color="#38bdf8" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <rect width="1200" height="630" fill="url(#bgglow)"/>
+
+  <!-- Faint scope rings (brand motif, bleeding off corners) -->
+  <g fill="none" stroke="#38bdf8" stroke-opacity="0.06" stroke-width="2">
+    <circle cx="1150" cy="600" r="120"/>
+    <circle cx="1150" cy="600" r="200"/>
+    <circle cx="1150" cy="600" r="290"/>
+    <circle cx="60" cy="40" r="90"/>
+    <circle cx="60" cy="40" r="160"/>
+  </g>
+
+  <!-- Wordmark: scope mark + skope -->
+  <g>
+    <circle cx="556" cy="103" r="13" fill="none" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.55"/>
+    <circle cx="556" cy="103" r="4.5" fill="#38bdf8"/>
+    <text x="578" y="113" text-anchor="start" font-family="Liberation Sans, Arial, sans-serif"
+          font-size="30" font-weight="700" letter-spacing="1" fill="#38bdf8">skope</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="600" y="210" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif"
+        font-size="56" font-weight="700" fill="#ededed">Your feed shows you everything.</text>
+  <text x="600" y="278" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif"
+        font-size="56" font-weight="700" fill="#ededed">skope shows you what reaches you.</text>
+
+  <!-- Hook -->
+  <text x="600" y="356" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif"
+        font-size="40" font-weight="700" fill="#38bdf8">Just ask Claude.</text>
+
+  <!-- Sub -->
+  <text x="600" y="424" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif"
+        font-size="22" font-weight="400" fill="#9a9a9a">Local-first news intelligence. Claude scans the world, skope keeps only what reaches you.</text>
+  <text x="600" y="454" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif"
+        font-size="22" font-weight="400" fill="#777777">No account. No API key. All data stays on your machine.</text>
+
+  <!-- Install box (monospace: fixed char advance lets us place the accent segment exactly) -->
+  <rect x="378" y="510" width="444" height="56" rx="10" fill="#141414" stroke="#202020" stroke-width="1"/>
+  <text x="396" y="546" text-anchor="start" font-family="Liberation Mono, DejaVu Sans Mono, monospace"
+        font-size="22" fill="#cfcfcf">npm install -g</text>
+  <text x="593" y="546" text-anchor="start" font-family="Liberation Mono, DejaVu Sans Mono, monospace"
+        font-size="22" fill="#38bdf8">@evan-moon/skope</text>
+</svg>

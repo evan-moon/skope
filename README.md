@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/evan-moon/skope/main/assets/og-image.png" alt="skope" width="560" />
+</p>
+
 <h1 align="center">skope</h1>
 
 <p align="center">

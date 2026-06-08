@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import LangToggle from '@/app/_components/LangToggle';
 import { LocaleProvider } from '@/app/_components/LocaleContext';
 import { isLocale, type Locale } from '@/app/_components/locale';
 import DocsMobileControls from './_mobile-controls';
@@ -20,9 +19,6 @@ export default async function LocaleDocsLayout({
       <DocsMobileControls />
       <div className="docs-outer">
         <div className="docs-sidebar-desktop">
-          <div className="docs-lang-row">
-            <LangToggle />
-          </div>
           <DocsSidebar />
         </div>
         <div className="docs-content">{children}</div>

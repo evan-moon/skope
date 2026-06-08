@@ -6,6 +6,7 @@
     "packages/*/*"
   ],
   "scripts": {
+    "dev": "yarn workspace @evan-moon/skope dev",
     "dev:cli": "yarn workspace @evan-moon/skope dev",
     "dev:mcp": "yarn workspace @skope/mcp dev",
     "dev:docs": "yarn workspace @skope/docs dev",

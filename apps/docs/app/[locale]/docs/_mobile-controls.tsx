@@ -1,7 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import LangToggle from '@/app/_components/LangToggle';
 import DocsSidebar from './_sidebar';
 
 export default function DocsMobileControls() {
@@ -23,9 +22,6 @@ export default function DocsMobileControls() {
         >
           Menu
         </button>
-        <div className="docs-mobile-lang">
-          <LangToggle />
-        </div>
       </div>
 
       <button

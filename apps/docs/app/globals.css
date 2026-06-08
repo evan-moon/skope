@@ -529,9 +529,6 @@ a {
   position: sticky;
   top: 5rem;
 }
-.docs-lang-row {
-  margin-bottom: 1.5rem;
-}
 .docs-mobile-tools,
 .docs-mobile-backdrop,
 .docs-mobile-drawer {
@@ -757,9 +754,6 @@ a {
     padding: 0.78rem 1rem;
     text-align: left;
     cursor: pointer;
-  }
-  .docs-mobile-lang {
-    padding-right: 0.5rem;
   }
   .docs-mobile-backdrop.open {
     display: block;
