@@ -1,13 +1,13 @@
 ---
-title: The Herald Family
-description: "skope is one of three local-first tools — firma (money), memex (memory), skope (news) — that share one principle: your data stays on your machine, and the AI comes to it."
+title: Ecosystem
+description: "skope is one of three local-first tools — firma (money), memex (memory), skope (news) — that interoperate through any MCP client. They share one principle: your data stays on your machine, and the AI comes to it."
 ---
 
-# The Herald Family
+# Ecosystem
 
-You're reading the docs for **skope**, the news layer of a small family of local-first tools. They share one principle: **your data stays on your machine, and the AI comes to it** — no uploads, no cloud, no account.
+**skope** is one of three small, local-first tools that interoperate. They share one principle: **your data stays on your machine, and the AI comes to it** — no uploads, no cloud, no account.
 
-## Three tools, one stack
+## Three tools, one principle
 
 | Tool | What it is | What it owns |
 | --- | --- | --- |
@@ -15,19 +15,28 @@ You're reading the docs for **skope**, the news layer of a small family of local
 | **firma** | financial intelligence | portfolio · net worth · cash flow, in `~/.firma/firma.db` |
 | **memex** | persistent memory | your notes and the context behind them, across every session |
 
-Each is an independent MCP server you install on its own. None depends on the others — but Claude can hold all three at once, and that's where they compound: skope can read your firma holdings to score which news actually reaches you, and memex remembers why you started following a story skope first surfaced.
+Each is an independent MCP server you install on its own. None depends on the others — but an AI client can hold all three at once, and that's where they compound: skope can read your firma holdings to score which news actually reaches you, and memex remembers why you started following a story skope first surfaced.
 
-This is exactly skope's [Federation](/en/docs/federation) principle, seen from above: skope owns its interest profile, and firma or memex are *optional adapters* Claude reads from — never dependencies skope calls.
+## How you use them
+
+The tools are the core. You reach them through whatever MCP client you like — the interface is just a front-end:
+
+- **Claude Desktop · Claude Code · Cursor** — the text way.
+- **[Herald](https://ai-herald.vercel.app)** — a voice interface, if you'd rather talk to your stack out loud (macOS).
+
+Nothing sits *above* the tools. The AI client orchestrates them, and you swap interfaces freely.
 
 ## Federation, not lock-in
 
-The tools never call each other. Each owns its own data and exposes its own MCP tools; Claude is the only thing that sees across them. Add or drop any one and the rest keep working. That's the whole design — **compose through the model, not through a backend.**
+The tools never call each other. Each owns its own data and exposes its own MCP tools; the AI client is the only thing that sees across them. Add or drop any one and the rest keep working — **compose through the model, not through a backend.**
 
-## Explore the rest of the family
+This is skope's own [Federation](/en/docs/federation) principle seen from outside: skope owns its interest profile, and firma or memex are *optional adapters* the AI reads from — never dependencies skope calls.
+
+## Explore the rest
 
 ### firma — your money
 
-Drop your trade history into Claude and get the full picture — portfolio, net worth, cash flow — in one local SQLite file. No account, no cloud. (skope can read it to sharpen your asset axis.)
+Drop your trade history into Claude and get the full picture — portfolio, net worth, cash flow — in one local SQLite file. (skope can read it to sharpen your asset axis.)
 
 [GitHub →](https://github.com/evan-moon/firma) · `npm install -g @evan-moon/firma`
 
@@ -36,7 +45,3 @@ Drop your trade history into Claude and get the full picture — portfolio, net 
 Make Claude remember you across sessions: notes, context, and the reasoning behind your decisions, kept in a local second brain.
 
 [GitHub →](https://github.com/evan-moon/memex) · `npm install -g @evan-moon/memex`
-
----
-
-Want to talk to the whole stack out loud? **[Herald](https://ai-herald.vercel.app)** is the ambient voice layer that ties the family together on macOS.

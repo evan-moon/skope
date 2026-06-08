@@ -26,7 +26,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     'federation':      'Federation',
     'cli':             'CLI Reference',
     'Ecosystem':       'Ecosystem',
-    'ecosystem':       'The Herald Family',
+    'ecosystem':       'Overview',
   },
   ko: {
     'Get Started': 'Get Started',
@@ -39,7 +39,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     'federation':      '페더레이션',
     'cli':             'CLI 레퍼런스',
     'Ecosystem':       'Ecosystem',
-    'ecosystem':       'Herald 패밀리',
+    'ecosystem':       '개요',
   },
 };
 
