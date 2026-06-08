@@ -1,0 +1,92 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g. v0.1.0)'
+        required: true
+
+jobs:
+  ci:
+    name: Smoke (ubuntu-latest / Node 22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install build tools
+        run: sudo apt-get install -y build-essential python3
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build packages
+        run: yarn turbo run build --filter='./packages/*/*'
+
+      - name: Build CLI (bundles the MCP server)
+        run: yarn workspace @evan-moon/skope build
+
+      - name: Pack tarball
+        run: npm pack
+        working-directory: apps/cli
+
+      - name: Install globally from tarball
+        run: npm install -g apps/cli/evan-moon-skope-*.tgz
+
+      - name: skope --version
+        run: skope --version
+
+      - name: End-to-end MCP tests
+        run: node test/mcp-tests.mjs
+
+  publish:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install build tools
+        run: sudo apt-get install -y build-essential python3
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build packages
+        run: yarn turbo run build --filter='./packages/*/*'
+
+      - name: Build CLI
+        run: yarn workspace @evan-moon/skope build
+
+      - name: Publish
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          PUBLISHED="$(npm view @evan-moon/skope@$VERSION version 2>/dev/null || echo '')"
+          if [ "$PUBLISHED" = "$VERSION" ]; then
+            echo "v$VERSION already on npm, skipping."
+          else
+            npm publish --access public
+          fi
+        working-directory: apps/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
