@@ -3,6 +3,7 @@ import { openDb, schema } from '@skope/db';
 import { coldStart } from '@skope/profile';
 import { Command } from 'commander';
 import pc from 'picocolors';
+import { mcpInstallCommand } from './commands/mcp.ts';
 import { readConfig, writeConfig } from './config.ts';
 
 const program = new Command();
@@ -69,6 +70,12 @@ program
       pc.green(`✓ Profile seeded for ${opts.location}. Edit axes via the MCP update_profile tool.`),
     );
   });
+
+const mcp = program.command('mcp').description('Manage MCP server integration');
+mcp
+  .command('install')
+  .description('Register skope with Claude Desktop and Claude Code')
+  .action(mcpInstallCommand);
 
 program
   .command('profile')

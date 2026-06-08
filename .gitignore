@@ -20,3 +20,8 @@ dist/
 apps/docs/.next/
 apps/docs/next-env.d.ts
 apps/docs/.vercel/
+
+# CLI publish copies (regenerated at build)
+apps/cli/README.md
+apps/cli/LICENSE
+apps/cli/*.tgz

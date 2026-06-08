@@ -8,6 +8,7 @@
   "scripts": {
     "dev:cli": "yarn workspace @evan-moon/skope dev",
     "dev:mcp": "yarn workspace @skope/mcp dev",
+    "dev:docs": "yarn workspace @skope/docs dev",
     "typecheck": "turbo typecheck",
     "build": "turbo build",
     "lint": "biome lint .",
