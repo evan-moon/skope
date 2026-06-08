@@ -15,3 +15,8 @@ dist/
 .vercel
 .DS_Store
 **/*/next-env.d.ts
+
+# Next.js docs
+apps/docs/.next/
+apps/docs/next-env.d.ts
+apps/docs/.vercel/
