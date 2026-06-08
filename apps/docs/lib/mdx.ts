@@ -1,7 +1,7 @@
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-import { evaluate, type EvaluateOptions } from '@mdx-js/mdx';
+import { type EvaluateOptions, evaluate } from '@mdx-js/mdx';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import matter from 'gray-matter';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactElement } from 'react';
@@ -23,17 +23,16 @@ export type DocSource = {
   Content: (props: { components?: MDXComponents }) => ReactElement;
 };
 
-const fileFor = (slug: string, locale: Locale) =>
-  join(CONTENT_ROOT, `${slug}.${locale}.mdx`);
+const fileFor = (slug: string, locale: Locale) => join(CONTENT_ROOT, `${slug}.${locale}.mdx`);
 
 export async function loadDoc(slug: string, locale: Locale): Promise<DocSource | null> {
   const targetPath = fileFor(slug, locale);
   const fallbackPath = fileFor(slug, 'en');
 
-  const path = existsSync(targetPath) ? targetPath
-             : existsSync(fallbackPath) ? fallbackPath
-             : null;
-  if (!path) return null;
+  const path = existsSync(targetPath) ? targetPath : existsSync(fallbackPath) ? fallbackPath : null;
+  if (!path) {
+    return null;
+  }
 
   const raw = await readFile(path, 'utf-8');
   const { data, content } = matter(raw);
