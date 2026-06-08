@@ -9,6 +9,8 @@
   --code-fg: #cccccc;
   --chat-user-bg: #1a1a1a;
   --chat-ai-bg: #111111;
+  --mobile-header-height: 3.25rem;
+  --docs-mobile-tools-height: 2.85rem;
 }
 
 * {
@@ -734,6 +736,11 @@ a {
   .docs-sidebar-desktop {
     display: none;
   }
+  .nav {
+    position: relative;
+    min-height: var(--mobile-header-height);
+    border-bottom: 1px solid var(--border);
+  }
   .docs-mobile-tools {
     display: flex;
     align-items: center;
@@ -741,7 +748,7 @@ a {
     position: sticky;
     top: 0;
     z-index: 50;
-    min-height: 2.85rem;
+    min-height: var(--docs-mobile-tools-height);
     padding: 0 0.5rem 0 0;
     background: color-mix(in srgb, var(--bg) 92%, transparent);
     backdrop-filter: blur(8px);
