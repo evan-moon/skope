@@ -1,0 +1,62 @@
+{
+  "name": "@evan-moon/skope",
+  "version": "0.1.0",
+  "mcpName": "io.github.evan-moon/skope",
+  "type": "module",
+  "description": "Local-first, AI-native personalized news intelligence — a lens + watcher on the world. Built-in MCP server for Claude Desktop.",
+  "keywords": [
+    "cli",
+    "news",
+    "intelligence",
+    "personalization",
+    "mcp",
+    "claude",
+    "anthropic",
+    "ai",
+    "local-first",
+    "sqlite",
+    "tavily"
+  ],
+  "homepage": "https://github.com/evan-moon/skope#readme",
+  "bugs": {
+    "url": "https://github.com/evan-moon/skope/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evan-moon/skope.git",
+    "directory": "apps/cli"
+  },
+  "license": "MIT",
+  "author": "Evan Moon <bboydart91@gmail.com> (https://github.com/evan-moon)",
+  "bin": {
+    "skope": "./dist/index.js",
+    "skope-mcp": "./dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup && yarn workspace @skope/mcp build && cp ../mcp/dist/index.js dist/mcp.js && cp ../../README.md README.md && cp ../../LICENSE LICENSE",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "@skope/db": "workspace:*",
+    "@skope/domain": "workspace:*",
+    "@skope/profile": "workspace:*",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@skope/db",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@skope/utils": "workspace:*",
+    "@types/better-sqlite3": "^7.6.13",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
+  }
+}

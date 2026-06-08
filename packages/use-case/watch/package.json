@@ -1,0 +1,23 @@
+{
+  "name": "@skope/watch",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@skope/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@skope/domain": "workspace:*",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,17 @@
+node_modules/
+.turbo/
+.claude/
+dist/
+*.tsbuildinfo
+.next/
+*.db
+.env
+.env.local
+!.env.local.example
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.vercel
+.DS_Store
+**/*/next-env.d.ts

@@ -1,0 +1,35 @@
+{
+  "name": "@skope/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "skope-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup src/index.ts --format esm --minify --no-splitting",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@skope/adapters": "workspace:*",
+    "@skope/brief": "workspace:*",
+    "@skope/db": "workspace:*",
+    "@skope/discovery": "workspace:*",
+    "@skope/domain": "workspace:*",
+    "@skope/profile": "workspace:*",
+    "@skope/utils": "workspace:*",
+    "@skope/watch": "workspace:*",
+    "better-sqlite3": "^12.9.0",
+    "drizzle-orm": "^0.45.2",
+    "es-toolkit": "^1.41.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}
