@@ -1,0 +1,40 @@
+---
+title: Reachability
+description: Relevance is a causal path that reaches you — not a keyword match. This is the idea skope is built around.
+---
+
+Most feeds ask: *"is this one of your interests?"* That's a filter, and filters narrow until you only ever see what you already follow. skope asks a different question: **does a causal path reach you?** That's a lens — it broadens without dissolving into random noise.
+
+## The test
+
+> `brazil rate hike` → EM outflows → dollar strength → TSLA valuation → **you** (you hold TSLA). **Reachable.**
+>
+> `a Brazilian's daily life` → … no path to your money, work, or country. **Excluded.**
+
+Same country, same region — but only one has a chain that lands on you. Reachability keeps the first and drops the second. A topic you've never searched for can still reach you; a topic adjacent to your interests can still be irrelevant.
+
+## The rule / LLM split
+
+This is the heart of skope's architecture. Reachability is computed in **two stages with a hard boundary between them**:
+
+1. **The rule seed (skope, deterministic).** skope stores only the **ReachabilitySeed**: which axis matched, which entity, the match type, and the strength. This is rule-based, reproducible, and lives in the ledger.
+2. **The causal narrative (Claude, stateless).** At brief time, Claude renders the human-readable chain — `brazil rate hike → USD strength → TSLA valuation` — *from* that seed. It is generated fresh each time and **never persisted**.
+
+The seed is the deterministic anchor; the narrative is disposable synthesis. skope never stores LLM-generated prose in the ledger — that keeps the ledger honest and the scoring reproducible.
+
+## Where the seed comes from
+
+Reachability is scored against your **profile axes** — the few dimensions along which the world can actually touch you:
+
+- **asset** — your holdings, currencies, sectors you're exposed to
+- **career** — your employer, industry, the companies in your orbit
+- **knowledge** — your stack, the tools and standards you build on
+- **location** — where you live, and the Tier-2 outlets that cover it
+
+Each article is matched against the entities and keywords on those axes. A match produces a seed with a strength; the impact score is a deterministic function of the seed plus the source's trust tier. No path, no seed, no radar.
+
+## Why it's a lens, not a filter
+
+A filter shrinks your world toward your stated interests until it becomes an echo chamber. A lens keeps the aperture wide — anything with a causal path qualifies, even from a domain you'd never think to follow — while still refusing the genuinely irrelevant. That's the whole point of skope: **news that reaches you**, not news you already asked for.
+
+See also: [Concentration](/en/docs/concentration), the companion watcher that warns you when even your reachable news collapses onto too few axes.

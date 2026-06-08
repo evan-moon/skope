@@ -37,6 +37,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <span className="nav-logo-mark">◎</span> skope
           </a>
           <div className="nav-links">
+            <a className="nav-link" href="/en/docs/getting-started">
+              Docs
+            </a>
             <a className="nav-link" href="https://github.com/evan-moon/firma">
               firma
             </a>

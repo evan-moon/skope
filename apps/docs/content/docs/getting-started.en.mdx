@@ -1,0 +1,74 @@
+---
+title: Installation
+description: Get skope running and connected to Claude in under two minutes.
+---
+
+skope is **local-first** and **key-less** by default. Your profile and the article ledger live in a single SQLite file at `~/.skope/skope.db`. Nothing leaves your machine unless Claude searches the web for you.
+
+## Install
+
+```bash
+npm install -g @evan-moon/skope
+```
+
+This installs the `skope` CLI (the safety net) and the bundled `skope-mcp` server (where the analysis lives).
+
+## Connect to Claude
+
+```bash
+skope mcp install
+```
+
+This registers skope with both **Claude Desktop** and **Claude Code** by writing the MCP server entry into their config files. Restart Claude Desktop to activate; Claude Code picks it up on the next session.
+
+## Connect to Claude Desktop manually
+
+If you'd rather edit the config yourself, add skope to
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "skope": {
+      "command": "node",
+      "args": ["<path to the bundled skope-mcp.js>"]
+    }
+  }
+}
+```
+
+`skope mcp install` resolves that path for you, so the command above is the recommended route.
+
+## Create a profile
+
+skope needs an interest profile before it can score anything. The fastest path is to let Claude build it — just ask, and Claude calls [`update_profile`](/en/docs/mcp-tools#update_profile) for you, optionally federating from firma (assets) or memex (memory).
+
+For a no-LLM cold start, the CLI seeds one from your location:
+
+```bash
+skope init --location "Seoul, Korea" --languages ko,en
+```
+
+See the [CLI Reference](/en/docs/cli) for the full command set.
+
+## What gets created
+
+```
+~/.skope/
+  skope.db        — profile, article ledger, read log (SQLite)
+  config.json     — optional Tavily key for scan_news
+```
+
+## Optional: a Tavily key
+
+skope's primary collection path ([`ingest_news`](/en/docs/mcp-tools#ingest_news)) needs **no key** — Claude searches the web itself. You only need a [Tavily](https://tavily.com) key for the [`scan_news`](/en/docs/mcp-tools#scan_news) fallback, used by clients without their own web search:
+
+```bash
+skope config set tavily-key tvly-xxxxxxxx
+```
+
+## Next steps
+
+- [MCP Tools](/en/docs/mcp-tools) — the six tools Claude calls.
+- [Reachability](/en/docs/reachability) — why skope is a lens, not a filter.
+- [Concentration](/en/docs/concentration) — the echo-chamber watcher.

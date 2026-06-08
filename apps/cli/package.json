@@ -47,13 +47,16 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
-    "@skope/db": "workspace:*",
-    "@skope/domain": "workspace:*",
-    "@skope/profile": "workspace:*",
+    "better-sqlite3": "^12.9.0",
     "commander": "^13.1.0",
+    "drizzle-orm": "^0.45.2",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
+    "@skope/db": "workspace:*",
+    "@skope/domain": "workspace:*",
+    "@skope/profile": "workspace:*",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.3",
     "tsup": "^8.4.0",
     "tsx": "^4.19.3",

@@ -1,0 +1,73 @@
+---
+title: 설치 및 시작
+description: skope를 설치하고 Claude에 연결하기 — 2분이면 충분하다.
+---
+
+skope는 기본적으로 **로컬 우선(local-first)**이고 **키가 필요 없다**. 프로필과 기사 원장은 `~/.skope/skope.db` 단일 SQLite 파일에 산다. Claude가 당신을 위해 웹을 검색하는 경우를 제외하면, 어떤 것도 당신의 기기를 떠나지 않는다.
+
+## 설치
+
+```bash
+npm install -g @evan-moon/skope
+```
+
+이것으로 `skope` CLI(안전망)와 번들된 `skope-mcp` 서버(분석이 사는 곳)가 설치된다.
+
+## Claude에 연결
+
+```bash
+skope mcp install
+```
+
+**Claude Desktop**과 **Claude Code** 양쪽 설정 파일에 MCP 서버 항목을 기록해 skope를 등록한다. 활성화하려면 Claude Desktop을 재시작하라; Claude Code는 다음 세션에서 인식한다.
+
+## Claude Desktop 수동 연결
+
+설정을 직접 편집하고 싶다면 `~/Library/Application Support/Claude/claude_desktop_config.json`에 추가한다:
+
+```json
+{
+  "mcpServers": {
+    "skope": {
+      "command": "node",
+      "args": ["<번들된 skope-mcp.js 경로>"]
+    }
+  }
+}
+```
+
+`skope mcp install`이 그 경로를 대신 찾아주므로, 위 명령이 권장 경로다.
+
+## 프로필 만들기
+
+skope는 무언가를 스코어링하기 전에 관심 프로필이 필요하다. 가장 빠른 길은 Claude에게 만들게 하는 것 — 그냥 요청하면 Claude가 [`update_profile`](/ko/docs/mcp-tools#update_profile)을 호출하고, 필요하면 firma(자산)나 memex(메모리)에서 페더레이션해 온다.
+
+LLM 없이 콜드 스타트하려면 CLI가 위치로부터 하나를 시드한다:
+
+```bash
+skope init --location "Seoul, Korea" --languages ko,en
+```
+
+전체 명령은 [CLI 레퍼런스](/ko/docs/cli)를 보라.
+
+## 무엇이 생성되나
+
+```
+~/.skope/
+  skope.db        — 프로필, 기사 원장, 읽음 로그 (SQLite)
+  config.json     — scan_news용 선택적 Tavily 키
+```
+
+## 선택: Tavily 키
+
+skope의 주 수집 경로([`ingest_news`](/ko/docs/mcp-tools#ingest_news))는 **키가 필요 없다** — Claude가 직접 웹을 검색한다. [Tavily](https://tavily.com) 키는 자체 웹 검색이 없는 클라이언트가 쓰는 [`scan_news`](/ko/docs/mcp-tools#scan_news) 폴백에만 필요하다:
+
+```bash
+skope config set tavily-key tvly-xxxxxxxx
+```
+
+## 다음 단계
+
+- [MCP 툴](/ko/docs/mcp-tools) — Claude가 호출하는 6개 툴.
+- [Reachability](/ko/docs/reachability) — skope가 필터가 아니라 렌즈인 이유.
+- [집중도 워처](/ko/docs/concentration) — 에코 체임버 감시자.

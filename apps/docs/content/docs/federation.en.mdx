@@ -1,0 +1,39 @@
+---
+title: Federation
+description: skope owns its profile. firma and memex are optional adapters Claude reads — never dependencies skope imports.
+---
+
+skope is part of the **Herald** ecosystem, alongside [firma](https://github.com/evan-moon/firma) (assets) and [memex](https://github.com/evan-moon/memex) (memory). They share a design rule: **federation, not dependency.**
+
+## The rule
+
+skope owns its interest profile as the **single source of truth**. It never imports another tool, never calls another tool, and does not break if another tool dies. Other tools enrich the profile only by going *through* Claude and the [`update_profile`](/en/docs/mcp-tools#update_profile) entry point.
+
+```
+firma ──▶ Claude reads it ──▶ update_profile ──▶ skope's profile
+memex ──▶ Claude reads it ──▶ update_profile ──▶ skope's profile
+```
+
+Claude is the integrator. It reads firma or memex with their own tools, decides what's relevant to your reachability, and writes axes into skope. skope sees only the resulting profile — it has no idea firma or memex exist.
+
+## Why not import firma directly?
+
+Because a hard dependency makes skope fragile and coupled. If skope imported firma's client, then firma's schema changes, outages, or absence would all become skope's problem. By keeping the integration at the LLM layer:
+
+- **skope stays standalone.** It works with nothing but a location and a manual profile.
+- **The boundary is the profile.** firma can change everything about how it stores assets; as long as Claude can still produce an `asset` axis, skope is unaffected.
+- **You stay in control.** Federation is something you ask Claude to do, not a background sync you can't see.
+
+## A typical federation turn
+
+> *"Update my skope profile from my firma portfolio."*
+>
+> Claude calls firma's `get_wealth_brief`, sees your top holdings and currency exposure, and calls skope's `update_profile` with an `asset` axis whose keywords are your tickers and currencies. Next time you ask for news, those holdings now have a reachability path.
+
+The same pattern works for memex: Claude reads what you've been thinking about and turns durable themes into a `knowledge` axis.
+
+## The single-source-of-truth invariant
+
+No matter how many tools feed it, the profile has exactly one home: skope's ledger at `~/.skope/skope.db`. Weights always normalize to sum 1.0, the axis count is capped at six, and `update_profile` replaces rather than silently merges. That keeps the profile legible no matter which tool last contributed to it.
+
+See also: [MCP Tools](/en/docs/mcp-tools) for the `update_profile` schema.

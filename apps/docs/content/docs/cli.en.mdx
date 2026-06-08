@@ -1,0 +1,60 @@
+---
+title: CLI Reference
+description: The skope CLI is the safety net — setup, manual profile editing, and read-only inspection. Analysis lives in the MCP server.
+---
+
+The CLI is deliberately small. Per skope's design, **analysis and synthesis are MCP tools** — the CLI exists for setup, manual profile editing, and read-only inspection when you're not in front of Claude.
+
+## skope init
+
+Create a cold-start profile from your location — no MCP integrations or LLM required.
+
+```bash
+skope init --location "Seoul, Korea" --languages ko,en
+```
+
+| Option | Required | Description |
+|--------|----------|-------------|
+| `--location <location>` | yes | e.g. `"Seoul, Korea"`. Drives geographic reachability and Tier-2 sources. |
+| `--languages <langs>` | no | Comma-separated, e.g. `ko,en`. Defaults to `en`. |
+
+## skope profile
+
+Show the current interest profile (read-only). Prints each axis with its normalized weight.
+
+```bash
+skope profile
+```
+
+If no profile exists yet, it points you at `skope init`.
+
+## skope config
+
+Manage local config at `~/.skope/config.json`.
+
+```bash
+skope config set tavily-key tvly-xxxxxxxx   # store a Tavily key for scan_news
+skope config show                            # show config (key redacted)
+```
+
+Only the Tavily key is configurable today; it's needed solely for the [`scan_news`](/en/docs/mcp-tools#scan_news) fallback. The primary [`ingest_news`](/en/docs/mcp-tools#ingest_news) path needs nothing.
+
+## skope mcp install
+
+Register skope with Claude Desktop and Claude Code by writing the MCP server entry into their config files.
+
+```bash
+skope mcp install
+```
+
+Restart Claude Desktop to activate; Claude Code picks it up on the next session.
+
+## Where things live
+
+```
+~/.skope/
+  skope.db        — profile, article ledger, read log (SQLite)
+  config.json     — optional Tavily key
+```
+
+The CLI and the MCP server share the same `~/.skope/skope.db`, so a profile you edit with the CLI is immediately visible to Claude, and vice-versa.

@@ -1,0 +1,102 @@
+---
+title: MCP Tools
+description: The tools skope exposes to Claude over the Model Context Protocol — the API surface of the lens.
+---
+
+When you connect skope to Claude, it gets six tools. Claude calls them on its own — you just talk to Claude. skope owns the **deterministic ledger** (profile, dedup, rule scoring, the read log, the reachability seed); Claude owns the **active collection** (searching the web) and the **synthesis** (the causal-chain narrative). The tools are the seam between the two.
+
+## Tools at a glance
+
+| Tool | Role | Needs a key |
+|------|------|-------------|
+| `show_profile` | Read the current interest profile | no |
+| `update_profile` | Upsert axes / user context (federation entry point) | no |
+| `ingest_news` | **Primary** collection — Claude searches, hands results here | no |
+| `scan_news` | **Fallback** collection — skope calls Tavily | Tavily key |
+| `get_brief` | Assemble the two-layer brief from the ledger | no |
+| `mark_read` | Mark articles read so they drop from future briefs | no |
+
+A typical "what's my news today?" turn: `show_profile` → Claude generates queries across the axes → Claude searches the web itself → `ingest_news` → `get_brief`.
+
+## show_profile
+
+Returns the current profile, or `{ configured: false }` if none exists yet.
+
+**Parameters:** none.
+
+**Returns:** `axes` (id, label, normalized `weight`, `keywords`), `user_context` (location, languages), and `last_scan`. An empty profile means setup is needed via `update_profile`.
+
+## update_profile
+
+Upsert the interest profile. This is the **federation entry point**: read another tool (firma, memex) yourself and feed the result here. skope never calls those tools — it owns the profile as the single source of truth.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `axes` | `Axis[]` _(optional)_ | Full axis set to replace the current one. Weights **auto-normalize to sum 1.0**; capped at **6 axes**. |
+| `user_context` | object _(optional)_ | `{ location: string, languages: string[] }`. Drives geographic reachability and Tier-2 source selection. |
+
+Each `Axis` is `{ id, label, weight, keywords[], source? }`. Pass the full set you want — `update_profile` replaces, it does not merge per-axis.
+
+> A profile needs at least one axis. Passing an empty set is rejected.
+
+## ingest_news
+
+**The primary, key-less collection path.** *You* search the web with your own tools, then hand the results here. Generate queries from the profile axes; prefer the user's Tier-1/Tier-2 trusted outlets and articles newer than `last_scan`.
+
+skope then canonicalizes URLs, derives the trust tier from each source, dedups by URL hash (plus a source+title content key for the same story under URL-parameter variants), rule-scores reachability against the profile, and persists to the ledger.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `articles` | `Article[]` | Web-search results you collected. At least one. |
+| `query_context` | string _(optional)_ | What you searched for — audit only. |
+
+Each `article` is:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `url` | string (URL) | Must be a real `http(s)` link. |
+| `title` | string | Non-empty. |
+| `snippet` | string _(optional)_ | Excerpt / description. |
+| `source` | string | Publisher domain or name, e.g. `"reuters.com"`. |
+| `published_at` | string _(optional)_ | A date string, ISO-8601 preferred. Best-effort parsed — a bad date drops the field, never the article. |
+
+**Returns:** `{ received, new, entered_radar, top[] }` — how many you sent, how many were new, how many entered the radar, and the top 5 by impact.
+
+## scan_news
+
+**The fallback collection path — requires a Tavily API key.** Use it only when you have no web-search tool of your own, or when you want skope to enforce the trusted-domain whitelist and the 5-call budget. skope calls Tavily with your queries, injects the Tier-1/2 whitelist, then runs the **same** dedup/score/persist pipeline as `ingest_news`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `queries` | string[] | Search queries, one per intent. **Capped at 5.** |
+| `time_range` | string _(optional)_ | Window hint: `1d` / `1w` / `1m` / `1y`. Defaults to `1w`. |
+
+Set the key via `SKOPE_TAVILY_API_KEY`, or `skope config set tavily-key <key>` (writes `~/.skope/config.json`). Without a key, `scan_news` returns an error pointing you to `ingest_news`.
+
+## get_brief
+
+Assemble the two-layer brief from the ledger — **no web fetch**. Run `ingest_news` first if the ledger is stale.
+
+**Parameters:** none.
+
+**Returns:**
+
+- `radar` — reachability-scored articles with a path to the user, each carrying `impact.seeds` (the rule-match seed: which axis, which entity, match type, strength).
+- `world` — top global headlines, shown regardless of relevance.
+- `concentration` — the Effective-N attention meter.
+
+You render the causal-chain narrative yourself from each article's `impact.seeds` (e.g. `brazil rate hike → USD strength → TSLA valuation`) and synthesize the prose. **Never persist that narrative back into the ledger** — skope stores only the deterministic seed.
+
+## mark_read
+
+Record articles as read so they are deterministically excluded from future briefs.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `urls` | string[] | Article URLs the user has seen/read. At least one. |
+
+skope hashes each URL to the ledger key. **Returns:** `{ marked }`.
+
+## Why ingest over a built-in fetcher
+
+skope's deterministic value — dedup, trust-tier, rule scoring, Effective-N, the ledger — is computed *after* fetch, on the article content. So it does not matter who fetched the bytes. Letting the orchestrating LLM collect (it already has web search) keeps skope key-less and frictionless, and is consistent with the rule: **collection is active, the ledger is deterministic.** Tavily stays as an optional adapter for clients without web search, or those who want the enforced whitelist and budget.

@@ -1,0 +1,60 @@
+---
+title: CLI 레퍼런스
+description: skope CLI는 안전망이다 — 셋업, 수동 프로필 편집, 읽기 전용 점검. 분석은 MCP 서버에 산다.
+---
+
+CLI는 의도적으로 작다. skope 설계상 **분석과 합성은 MCP 툴**이다 — CLI는 셋업, 수동 프로필 편집, 그리고 Claude 앞에 있지 않을 때의 읽기 전용 점검을 위해 존재한다.
+
+## skope init
+
+위치로부터 콜드 스타트 프로필을 만든다 — MCP 통합이나 LLM 불필요.
+
+```bash
+skope init --location "Seoul, Korea" --languages ko,en
+```
+
+| 옵션 | 필수 | 설명 |
+|--------|------|------|
+| `--location <location>` | 예 | 예: `"Seoul, Korea"`. 지리적 reachability와 Tier-2 소스를 좌우. |
+| `--languages <langs>` | 아니오 | 쉼표 구분, 예: `ko,en`. 기본값 `en`. |
+
+## skope profile
+
+현재 관심 프로필을 보여준다(읽기 전용). 각 축을 정규화된 weight와 함께 출력한다.
+
+```bash
+skope profile
+```
+
+아직 프로필이 없으면 `skope init`로 안내한다.
+
+## skope config
+
+`~/.skope/config.json`의 로컬 설정을 관리한다.
+
+```bash
+skope config set tavily-key tvly-xxxxxxxx   # scan_news용 Tavily 키 저장
+skope config show                            # 설정 보기 (키는 가려짐)
+```
+
+오늘 설정 가능한 건 Tavily 키뿐이다; [`scan_news`](/ko/docs/mcp-tools#scan_news) 폴백에만 필요하다. 주 경로인 [`ingest_news`](/ko/docs/mcp-tools#ingest_news)는 아무것도 필요 없다.
+
+## skope mcp install
+
+Claude Desktop과 Claude Code 설정 파일에 MCP 서버 항목을 기록해 skope를 등록한다.
+
+```bash
+skope mcp install
+```
+
+활성화하려면 Claude Desktop을 재시작하라; Claude Code는 다음 세션에서 인식한다.
+
+## 무엇이 어디 있나
+
+```
+~/.skope/
+  skope.db        — 프로필, 기사 원장, 읽음 로그 (SQLite)
+  config.json     — 선택적 Tavily 키
+```
+
+CLI와 MCP 서버는 같은 `~/.skope/skope.db`를 공유한다. 그래서 CLI로 편집한 프로필이 Claude에게 즉시 보이고, 반대도 마찬가지다.

@@ -1,0 +1,102 @@
+---
+title: MCP 툴
+description: skope가 Model Context Protocol을 통해 Claude에게 노출하는 툴 — 렌즈의 API 표면.
+---
+
+skope를 Claude에 연결하면 6개의 툴이 생긴다. 툴은 Claude가 알아서 호출한다 — 당신은 그냥 Claude와 대화하면 된다. skope는 **결정론적 원장**(프로필, 중복 제거, 룰 스코어링, 읽음 로그, reachability 시드)을 소유하고, Claude는 **능동적 수집**(웹 검색)과 **합성**(인과 사슬 내러티브)을 맡는다. 툴은 그 둘 사이의 경계다.
+
+## 한눈에 보기
+
+| 툴 | 역할 | 키 필요 |
+|------|------|---------|
+| `show_profile` | 현재 관심 프로필 읽기 | 아니오 |
+| `update_profile` | 축 / 유저 컨텍스트 upsert (페더레이션 진입점) | 아니오 |
+| `ingest_news` | **주 수집 경로** — Claude가 검색하고 결과를 넘김 | 아니오 |
+| `scan_news` | **폴백 수집 경로** — skope가 Tavily 호출 | Tavily 키 |
+| `get_brief` | 원장에서 2-레이어 브리프 조립 | 아니오 |
+| `mark_read` | 읽은 기사를 향후 브리프에서 제외 | 아니오 |
+
+"오늘 내 뉴스 뭐야?" 한 턴의 전형적 흐름: `show_profile` → Claude가 축 전반에 걸쳐 쿼리 생성 → Claude가 직접 웹 검색 → `ingest_news` → `get_brief`.
+
+## show_profile
+
+현재 프로필을 반환한다. 아직 없으면 `{ configured: false }`.
+
+**파라미터:** 없음.
+
+**반환:** `axes`(id, label, 정규화된 `weight`, `keywords`), `user_context`(location, languages), `last_scan`. 프로필이 비어 있으면 `update_profile`로 셋업이 필요하다는 뜻이다.
+
+## update_profile
+
+관심 프로필을 upsert 한다. 이것이 **페더레이션 진입점**이다: firma, memex 같은 다른 툴을 *당신이* 직접 읽어서 그 결과를 여기에 넣는다. skope는 그 툴들을 절대 호출하지 않는다 — 프로필을 단일 진실 공급원(single source of truth)으로 소유한다.
+
+| 파라미터 | 타입 | 설명 |
+|-----------|------|------|
+| `axes` | `Axis[]` _(선택)_ | 현재 축 집합을 통째로 교체. weight는 **자동으로 합 1.0으로 정규화**되고, **최대 6축**으로 제한된다. |
+| `user_context` | object _(선택)_ | `{ location: string, languages: string[] }`. 지리적 reachability와 Tier-2 소스 선택을 좌우한다. |
+
+각 `Axis`는 `{ id, label, weight, keywords[], source? }`. 원하는 전체 집합을 넘겨라 — `update_profile`은 축별 병합이 아니라 **교체**다.
+
+> 프로필에는 최소 한 개의 축이 필요하다. 빈 집합은 거부된다.
+
+## ingest_news
+
+**주 수집 경로 — 키 불필요.** *당신이* 직접 웹을 검색하고 결과를 여기로 넘긴다. 프로필 축에서 쿼리를 생성하라; 유저의 Tier-1/Tier-2 신뢰 매체와 `last_scan` 이후의 기사를 우선하라.
+
+그러면 skope가 URL을 정규화하고, 각 소스에서 신뢰 티어를 도출하고, URL 해시(+ 같은 기사가 URL 파라미터 변형으로 다시 들어오는 걸 잡는 source+title 콘텐츠 키)로 중복을 제거하고, 프로필 대비 reachability를 룰로 스코어링한 뒤 원장에 영속화한다.
+
+| 파라미터 | 타입 | 설명 |
+|-----------|------|------|
+| `articles` | `Article[]` | 당신이 수집한 웹 검색 결과. 최소 1개. |
+| `query_context` | string _(선택)_ | 무엇을 검색했는지 — 감사 용도만. |
+
+각 `article`:
+
+| 필드 | 타입 | 설명 |
+|-------|------|------|
+| `url` | string (URL) | 실제 `http(s)` 링크여야 한다. |
+| `title` | string | 비어 있으면 안 됨. |
+| `snippet` | string _(선택)_ | 발췌 / 설명. |
+| `source` | string | 발행처 도메인 또는 이름, 예: `"reuters.com"`. |
+| `published_at` | string _(선택)_ | 날짜 문자열, ISO-8601 권장. 베스트-에포트로 파싱 — 잘못된 날짜는 필드만 버리고 기사는 버리지 않는다. |
+
+**반환:** `{ received, new, entered_radar, top[] }` — 보낸 수, 신규 수, 레이더 진입 수, 임팩트 상위 5개.
+
+## scan_news
+
+**폴백 수집 경로 — Tavily API 키 필요.** 자체 웹 검색 도구가 없거나, skope가 신뢰 도메인 화이트리스트와 5콜 예산을 강제하길 원할 때만 쓴다. skope가 당신의 쿼리로 Tavily를 호출하고 Tier-1/2 화이트리스트를 주입한 뒤, `ingest_news`와 **동일한** 중복 제거/스코어/영속화 파이프라인을 돌린다.
+
+| 파라미터 | 타입 | 설명 |
+|-----------|------|------|
+| `queries` | string[] | 의도별 검색 쿼리. **최대 5개로 제한.** |
+| `time_range` | string _(선택)_ | 윈도우 힌트: `1d` / `1w` / `1m` / `1y`. 기본값 `1w`. |
+
+키는 `SKOPE_TAVILY_API_KEY` 또는 `skope config set tavily-key <key>`(`~/.skope/config.json`에 기록)로 설정한다. 키가 없으면 `scan_news`는 `ingest_news`로 안내하는 에러를 반환한다.
+
+## get_brief
+
+원장에서 2-레이어 브리프를 조립한다 — **웹 페치 없음**. 원장이 오래됐으면 먼저 `ingest_news`를 돌려라.
+
+**파라미터:** 없음.
+
+**반환:**
+
+- `radar` — 유저로 향하는 경로를 가진, reachability 스코어링된 기사들. 각각 `impact.seeds`(룰 매치 시드: 어떤 축, 어떤 엔티티, 매치 타입, 강도)를 들고 있다.
+- `world` — 관련성과 무관하게 보여주는 글로벌 헤드라인 상위.
+- `concentration` — Effective-N 집중도 미터.
+
+인과 사슬 내러티브(예: `brazil rate hike → USD strength → TSLA valuation`)는 각 기사의 `impact.seeds`로부터 *당신이* 렌더링하고 산문으로 합성한다. **그 내러티브를 원장에 다시 영속화하지 마라** — skope는 결정론적 시드만 저장한다.
+
+## mark_read
+
+기사를 읽음으로 기록해 향후 브리프에서 결정론적으로 제외한다.
+
+| 파라미터 | 타입 | 설명 |
+|-----------|------|------|
+| `urls` | string[] | 유저가 본/읽은 기사 URL. 최소 1개. |
+
+skope가 각 URL을 원장 키로 해싱한다. **반환:** `{ marked }`.
+
+## 왜 내장 페처가 아니라 ingest인가
+
+skope의 결정론적 가치 — 중복 제거, 신뢰 티어, 룰 스코어링, Effective-N, 원장 — 는 페치 *이후* 기사 콘텐츠 위에서 계산된다. 그러니 누가 바이트를 가져왔는지는 중요하지 않다. 오케스트레이팅 LLM이 수집하게 두면(이미 웹 검색을 가지고 있으니) skope는 키 없이 마찰 없이 동작하고, **수집은 능동적, 원장은 결정론적**이라는 원칙과 일치한다. Tavily는 자체 웹 검색이 없거나 강제 화이트리스트/예산을 원하는 클라이언트를 위한 선택적 어댑터로 남는다.
