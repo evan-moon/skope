@@ -40,12 +40,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <a className="nav-link" href="/en/docs/getting-started">
               Docs
             </a>
-            <a className="nav-link" href="https://github.com/evan-moon/firma">
-              firma
-            </a>
-            <a className="nav-link" href="https://github.com/evan-moon/memex">
-              memex
-            </a>
             <a className="nav-link" href="https://github.com/evan-moon/skope">
               GitHub <span className="nav-arrow">↗</span>
             </a>
