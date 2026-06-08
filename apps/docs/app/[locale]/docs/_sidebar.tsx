@@ -11,6 +11,7 @@ const DOCS_ROUTES: { slug: string; localized: Locale[]; group: string }[] = [
   { slug: 'concentration',   group: 'Concepts',    localized: ['en', 'ko'] },
   { slug: 'federation',      group: 'Concepts',    localized: ['en', 'ko'] },
   { slug: 'cli',             group: 'Reference',   localized: ['en', 'ko'] },
+  { slug: 'ecosystem',       group: 'Ecosystem',   localized: ['en', 'ko'] },
 ];
 
 const LABELS: Record<Locale, Record<string, string>> = {
@@ -24,6 +25,8 @@ const LABELS: Record<Locale, Record<string, string>> = {
     'concentration':   'Concentration',
     'federation':      'Federation',
     'cli':             'CLI Reference',
+    'Ecosystem':       'Ecosystem',
+    'ecosystem':       'The Herald Family',
   },
   ko: {
     'Get Started': 'Get Started',
@@ -35,6 +38,8 @@ const LABELS: Record<Locale, Record<string, string>> = {
     'concentration':   '집중도 워처',
     'federation':      '페더레이션',
     'cli':             'CLI 레퍼런스',
+    'Ecosystem':       'Ecosystem',
+    'ecosystem':       'Herald 패밀리',
   },
 };
 
