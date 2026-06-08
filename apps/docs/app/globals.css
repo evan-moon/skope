@@ -6,6 +6,7 @@
   --border: #202020;
   --accent: #38bdf8;
   --code-bg: #161616;
+  --code-fg: #cccccc;
   --chat-user-bg: #1a1a1a;
   --chat-ai-bg: #111111;
 }
@@ -47,7 +48,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 720px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 1rem 1.5rem;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -83,7 +84,7 @@ a {
 
 /* ── Layout ───────────────────────────────── */
 .page {
-  max-width: 720px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 3rem 1.5rem 6rem;
 }
@@ -139,7 +140,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 0.85rem;
-  color: #cccccc;
+  color: var(--code-fg);
 }
 .install::before {
   content: '$ ';
