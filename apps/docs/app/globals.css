@@ -123,7 +123,7 @@ a {
   font-size: 1.02rem;
   line-height: 1.6;
   color: var(--muted);
-  max-width: 38rem;
+  max-width: 520px;
   margin-bottom: 2rem;
 }
 .hero-actions {
@@ -473,7 +473,7 @@ a {
 }
 
 /* ── Responsive ───────────────────────────── */
-@media (max-width: 640px) {
+@media (max-width: 540px) {
   .hero-headline {
     font-size: 2rem;
   }
