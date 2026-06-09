@@ -269,7 +269,7 @@ server.tool(
     'then BALANCE it — the counter-current / what would break the thesis (mandatory, never ' +
     'one-sided); and close with a concrete one-line judgment, not "let\'s watch". CRUCIAL — write ' +
     'flowing EXPLANATORY prose a reader can follow cold, with zero prior context: the arc is ' +
-    'INVISIBLE scaffolding, NEVER printed as labels ("통념/메커니즘/판정", "thesis/mechanism"); walk ' +
+    'INVISIBLE scaffolding, NEVER printed as labels ("thesis/mechanism/verdict"); walk ' +
     'each step one idea per sentence, define any jargon the instant it appears (supercore, dot plot, ' +
     'index inclusion…) and land it with an everyday analogy; explain the mechanism like a smart ' +
     'friend talking, not a filled template. Telegraphic labeled shorthand and undefined jargon are ' +
