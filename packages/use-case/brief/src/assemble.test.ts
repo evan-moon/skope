@@ -13,6 +13,20 @@ const scored = (urlHash: string, total: number): ScoredArticle => ({
   impact: { total, hits: [{ axisId: 'asset', contribution: total }], seeds: [] },
 });
 
+/** A purely-situational (broad/thin) article matching one systemic category. */
+const situational = (urlHash: string, total: number, category: string): ScoredArticle => ({
+  urlHash,
+  url: `https://example.com/${urlHash}`,
+  title: urlHash,
+  source: 'reuters.com',
+  tier: 1,
+  impact: {
+    total,
+    hits: [{ axisId: 'situational', contribution: total }],
+    seeds: [{ axisId: 'situational', entity: category, matchType: 'situational', strength: 1 }],
+  },
+});
+
 describe('freshnessDecay', () => {
   it('does not penalize a never-shown article', () => {
     expect(freshnessDecay(Number.POSITIVE_INFINITY)).toBe(1);
@@ -69,5 +83,33 @@ describe('assembleBrief radar rotation', () => {
     );
     // 0.9 * 0.3 = 0.27 > 0.2 → the strong story holds even just after being shown.
     expect(brief.radar.map((a) => a.urlHash)).toEqual(['shown', 'fresh']);
+  });
+});
+
+describe('assembleBrief situational diversity cap', () => {
+  it('caps purely-situational items at 3 per category so one system cannot flood the radar', () => {
+    const quakes = [1, 2, 3, 4, 5].map((i) => situational(`quake${i}`, 0.09, 'natural-disaster'));
+    const brief = assembleBrief({ scored: quakes, world: [], axisTotals: [] });
+    expect(brief.radar).toHaveLength(3);
+  });
+
+  it('caps each category independently', () => {
+    const mixed = [
+      situational('q1', 0.09, 'natural-disaster'),
+      situational('q2', 0.09, 'natural-disaster'),
+      situational('q3', 0.09, 'natural-disaster'),
+      situational('q4', 0.09, 'natural-disaster'),
+      situational('s1', 0.09, 'sanctions'),
+      situational('s2', 0.09, 'sanctions'),
+    ];
+    const brief = assembleBrief({ scored: mixed, world: [], axisTotals: [] });
+    // 3 quakes (capped) + 2 sanctions (under cap) = 5
+    expect(brief.radar.map((a) => a.urlHash)).toEqual(['q1', 'q2', 'q3', 's1', 's2']);
+  });
+
+  it('never caps personal-axis hits — only the broad/thin band', () => {
+    const personal = [1, 2, 3, 4, 5].map((i) => scored(`p${i}`, 0.2));
+    const brief = assembleBrief({ scored: personal, world: [], axisTotals: [] });
+    expect(brief.radar).toHaveLength(5);
   });
 });
