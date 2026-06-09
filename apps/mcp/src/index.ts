@@ -253,16 +253,25 @@ server.tool(
   'get_brief',
   'Assemble the two-layer brief from the ledger (no web fetch): [radar] reachability-scored news ' +
     'toward the user + [world] top global headlines (shown regardless of relevance) + the ' +
-    'Effective-N concentration meter. Render the causal-chain narrative yourself from each ' +
-    "article's impact.seeds; synthesize the prose as a REPORT. Go deep, not shallow — a bare " +
-    '"this reaches you" line is not enough: (1) group related radar items into a single thesis ' +
-    'rather than listing them; (2) for the top reachability clusters, pull the relevant federated ' +
-    'drill-down — firma (show_concentration / show_risk / simulate_scenario) for asset items, memex ' +
-    'for career/knowledge — and quantify the exposure with real numbers: position sizes, ' +
-    'correlations, concentration (compare firma portfolio Effective-N vs skope news Effective-N), ' +
-    'cross-factor tensions; (3) end each cluster with a so-what / what-to-watch. The radar ' +
-    'auto-rotates — articles shown in a recent brief are demoted (not dropped) so each brief ' +
-    'surfaces newer items. Run ingest_news first if the ledger is stale.',
+    'Effective-N concentration meter. Then synthesize the NEWS into a report in the register of a ' +
+    'sell-side morning note — it is a NEWS briefing, not a portfolio report. Build it ENTIRELY from ' +
+    "skope's OWN data (each item's impact.seeds, the two bands, the Effective-N meter); it must be " +
+    'complete and valuable with NO other tool connected — skope never depends on firma/memex. ' +
+    'FIND THE THROUGHLINE FIRST: the causal thread — often a single upstream force — that links the ' +
+    "day's items across axes (e.g. one oil shock rippling to the user's region inflation AND, via " +
+    'the Fed, to their growth stocks). The seeds make these links explicit — use them. Tell the ' +
+    'brief as THAT STORY, not as disconnected buckets. Structure: (H) dated header + a lede that ' +
+    'states the throughline; (1) numbered THESES as movements of that story — each groups related ' +
+    'radar items, leads with the takeaway, renders the causal chain from the seeds (WHY it reaches ' +
+    'the user: keyword=direct, reach=causal-upstream, situational=region/systemic), surfaces the ' +
+    'tension/stakes, and closes with what-to-watch; (2) MACRO / SITUATIONAL — the broad/thin band ' +
+    '(region + systemic shocks); (3) CONCENTRATION — read the news Effective-N: is the lens wide or ' +
+    'narrowing onto one axis?; (4) a dated CATALYSTS line drawn from the items themselves. Write ' +
+    'with narrative momentum and a point of view — a dry recitation of headlines is the failure ' +
+    'mode; the value is the connective tissue between stories. OPTIONAL: IF firma or memex happen ' +
+    'to be connected you MAY pull their numbers to deepen a cluster, but that is a bonus, never ' +
+    'required. The radar auto-rotates — items shown recently are demoted so each brief surfaces ' +
+    'newer ones. Run ingest_news first if stale.',
   {},
   async () => {
     const profile = repo.loadProfile();
