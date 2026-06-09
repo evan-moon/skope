@@ -393,68 +393,29 @@ export class Repo {
   }
 
   /**
-   * Reconstruct recently-seen scored articles from the ledger (articles_seen ⋈ article_impacts),
-   * excluding read/muted. Used by get_brief to assemble without re-fetching the web.
+   * Recent articles from the ledger (articles_seen, within the window). get_brief RE-SCORES these
+   * against the CURRENT profile rather than reading the impacts stored at ingest — so a profile
+   * change (or a federation refresh) takes effect immediately and a brief never shows a stale score
+   * from a profile that no longer applies. The stored article_impacts remain the historical record
+   * for the 14-day Effective-N meter; the brief is a fresh function of (recent articles, current
+   * profile). Deterministic, just re-derived at read time.
    */
-  recentScored(windowHours = 24, excluded: ReadonlySet<string> = new Set()): ScoredArticle[] {
+  recentArticles(windowHours = 24): Article[] {
     const since = new Date(Date.now() - windowHours * 60 * 60 * 1000);
-    const articles = this.db
+    const rows = this.db
       .select()
       .from(articlesSeen)
       .where(gte(articlesSeen.firstSeenAt, since))
       .all();
-    const impacts = this.db.select().from(articleImpacts).all();
-    const byHash = new Map<string, typeof impacts>();
-    for (const imp of impacts) {
-      const list = byHash.get(imp.urlHash) ?? [];
-      list.push(imp);
-      byHash.set(imp.urlHash, list);
-    }
-
-    const scored: ScoredArticle[] = [];
-    for (const a of articles) {
-      if (excluded.has(a.urlHash)) {
-        continue;
-      }
-      const rows = byHash.get(a.urlHash) ?? [];
-      if (rows.length === 0) {
-        continue;
-      }
-      const hits = rows.map((r) => ({ axisId: r.axisId, contribution: r.score }));
-      const seeds = rows
-        .filter((r) => r.matchSeed)
-        .map((r) => {
-          const s = JSON.parse(r.matchSeed as string) as {
-            entity: string;
-            matchType: 'keyword' | 'reach' | 'situational' | 'entity' | 'geo' | 'sector';
-            strength: number;
-          };
-          return {
-            axisId: r.axisId,
-            entity: s.entity,
-            matchType: s.matchType,
-            strength: s.strength,
-          };
-        });
-      scored.push({
-        urlHash: a.urlHash,
-        url: a.url,
-        title: a.title,
-        snippet: a.snippet ?? undefined,
-        source: a.source,
-        tier: a.tier as 0 | 1 | 2 | 3,
-        publishedAt: a.publishedAt ? a.publishedAt.getTime() : undefined,
-        impact: {
-          total: Math.min(
-            1,
-            hits.reduce((acc, h) => acc + h.contribution, 0),
-          ),
-          hits,
-          seeds,
-        },
-      });
-    }
-    return scored.sort((x, y) => y.impact.total - x.impact.total);
+    return rows.map((a) => ({
+      urlHash: a.urlHash,
+      url: a.url,
+      title: a.title,
+      snippet: a.snippet ?? undefined,
+      source: a.source,
+      tier: a.tier as 0 | 1 | 2 | 3,
+      publishedAt: a.publishedAt ? a.publishedAt.getTime() : undefined,
+    }));
   }
 
   /**

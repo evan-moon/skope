@@ -2,7 +2,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { buildSituationalContext, createSearchProvider, normalizeArticles } from '@skope/adapters';
-import { assembleBrief, dropStaleSituational } from '@skope/brief';
+import { assembleBrief } from '@skope/brief';
 import { scoreBatch } from '@skope/discovery';
 import type { Article, Axis, Profile, RawArticle, SearchQuery } from '@skope/domain';
 import { normalizeAxes, profileGaps } from '@skope/profile';
@@ -288,15 +288,16 @@ server.tool(
       return err('No profile. Call update_profile first.');
     }
     const excluded = repo.exclusionSet();
-    // Expire situational items tied to a region the user has left — the broad band tracks NOW, and
-    // the ledger never re-scores. Region/category sets come from the same builder scoring uses.
-    const sit = buildSituationalContext(profile.userContext);
-    const currentRegions = new Set(sit.regionTokens.map((r) => r.token));
-    const systemicIds = new Set(sit.systemic.map((c) => c.id));
-    const scored = dropStaleSituational(
-      repo.recentScored(24, excluded),
-      currentRegions,
-      systemicIds,
+    // RE-SCORE recent articles against the CURRENT profile (don't read impacts frozen at ingest) —
+    // so a profile change or federation refresh takes effect immediately and no stale score from an
+    // old profile leaks into the brief. An article that no longer matches simply scores zero seeds
+    // and drops out. The stored impacts stay as the historical 14-day Effective-N record.
+    const scored = scoreBatch(
+      repo.recentArticles(24),
+      profile.axes,
+      excluded,
+      profile.userContext.location,
+      buildSituationalContext(profile.userContext),
     );
     const radarHashes = new Set(scored.map((a) => a.urlHash));
     const world = repo.recentWorld(24, 5, radarHashes);

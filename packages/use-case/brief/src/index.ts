@@ -1,6 +1,1 @@
-export {
-  type AssembleInput,
-  assembleBrief,
-  dropStaleSituational,
-  freshnessDecay,
-} from './assemble.ts';
+export { type AssembleInput, assembleBrief, freshnessDecay } from './assemble.ts';

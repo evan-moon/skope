@@ -45,36 +45,9 @@ export function freshnessDecay(ageMs: number): number {
   return FRESH_FLOOR + (1 - FRESH_FLOOR) * recovered;
 }
 
-/**
 /** A personal hit (interest axis) earns its slot; an article carried only by geo/situational is broad/thin. */
 function isPersonal(article: ScoredArticle): boolean {
   return article.impact.hits.some((h) => !VIRTUAL_AXES.has(h.axisId));
-}
-
-/**
- * Drop reconstructed articles whose ONLY reachability is a now-stale *region* — the broad band must
- * track the user's CURRENT situation, not where they were last week. The ledger never re-scores, so
- * an article scored as situational:"new zealand" while travelling lingers in the window after the
- * user flies home; this read-time filter expires those. Conservative — it keeps anything with a
- * personal hit, a geo hit (Tier-2 passthrough can't be validated against region tokens), a systemic
- * category (location-independent), or a region still in the current set. Pure; the ledger is untouched.
- */
-export function dropStaleSituational(
-  scored: ScoredArticle[],
-  currentRegions: ReadonlySet<string>,
-  systemicIds: ReadonlySet<string>,
-): ScoredArticle[] {
-  return scored.filter((a) => {
-    if (a.impact.hits.some((h) => !VIRTUAL_AXES.has(h.axisId) || h.axisId === 'geo')) {
-      return true; // personal or geo path — never expired here
-    }
-    const sit = a.impact.seeds.filter((s) => s.matchType === 'situational');
-    if (sit.length === 0) {
-      return true;
-    }
-    // keep if any situational seed is still live: a systemic category, or a region we're still in
-    return sit.some((s) => systemicIds.has(s.entity) || currentRegions.has(s.entity));
-  });
 }
 
 /** The situational category/region entities an article matched (empty for personal-only articles). */

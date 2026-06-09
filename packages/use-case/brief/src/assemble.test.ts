@@ -1,6 +1,6 @@
 import type { ScoredArticle } from '@skope/domain';
 import { describe, expect, it } from 'vitest';
-import { assembleBrief, dropStaleSituational, freshnessDecay } from './assemble.ts';
+import { assembleBrief, freshnessDecay } from './assemble.ts';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -111,49 +111,5 @@ describe('assembleBrief situational diversity cap', () => {
     const personal = [1, 2, 3, 4, 5].map((i) => scored(`p${i}`, 0.2));
     const brief = assembleBrief({ scored: personal, world: [], axisTotals: [] });
     expect(brief.radar).toHaveLength(5);
-  });
-});
-
-describe('dropStaleSituational', () => {
-  const currentRegions = new Set(['seoul', 'korea']);
-  const systemicIds = new Set(['natural-disaster', 'sanctions']);
-  const geoArticle = (urlHash: string): ScoredArticle => ({
-    urlHash,
-    url: `https://example.com/${urlHash}`,
-    title: urlHash,
-    source: 'rnz.co.nz',
-    tier: 2,
-    impact: {
-      total: 0.135,
-      hits: [{ axisId: 'geo', contribution: 0.135 }],
-      seeds: [{ axisId: 'geo', entity: 'rnz.co.nz', matchType: 'geo', strength: 1 }],
-    },
-  });
-
-  it('drops a pure-situational article whose only region is one the user has left', () => {
-    const kept = dropStaleSituational(
-      [situational('nz', 0.09, 'new zealand')],
-      currentRegions,
-      systemicIds,
-    );
-    expect(kept).toHaveLength(0);
-  });
-
-  it('keeps a systemic-category hit (location-independent)', () => {
-    const kept = dropStaleSituational(
-      [situational('quake', 0.09, 'natural-disaster')],
-      currentRegions,
-      systemicIds,
-    );
-    expect(kept).toHaveLength(1);
-  });
-
-  it('keeps a region still in the current set, a personal hit, and a geo hit', () => {
-    const kept = dropStaleSituational(
-      [situational('kr', 0.09, 'seoul'), scored('p', 0.2), geoArticle('g')],
-      currentRegions,
-      systemicIds,
-    );
-    expect(kept.map((a) => a.urlHash)).toEqual(['kr', 'p', 'g']);
   });
 });
