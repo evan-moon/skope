@@ -39,7 +39,16 @@ export const SERVER_INSTRUCTIONS =
   "BOTH each axis's keywords (the literal entities) AND its reachAnchors (causal-upstream topics " +
   'that reach the user without naming the entity — e.g. "Fed rate", "USD/KRW" for a TSLA holder). ' +
   'Searching only the literal keywords is what makes briefs feel repetitive; the anchors are the ' +
-  'lens. Search the web yourself, call ingest_news with the results, then get_brief (its radar ' +
-  'auto-rotates already-shown items down). Only fall back to scan_news (Tavily) if you have no web ' +
-  'search of your own. If a profile has empty reachAnchors, infer a few per axis and offer to save ' +
-  'them via update_profile.';
+  'lens. Deliver TWO bands every time: (1) NARROW & DEEP — news related to the user (the profile ' +
+  'axes above); (2) BROAD & THIN — "world that can affect me": the user\'s region/country and global ' +
+  'systemic shocks (energy, supply-chain, sanctions, rates/FX, cyber/outage, natural-disaster, ' +
+  'conflict, pandemic). Generate broad queries for those too — skope scores them on a situational ' +
+  'axis and surfaces them additively. Do not rely on the stored profile alone: also draw on the live ' +
+  "conversation, memex (the user's location, life situation, projects), and firma (portfolio), and " +
+  'enumerate the connected MCP tools — if a read-only tool (get_/show_/search_/list_) plausibly ' +
+  'carries situational signal, use it (confirm before first use of an unfamiliar one). Keep ' +
+  'userContext.location fresh from conversation/memex via update_profile — the current location can ' +
+  'differ from home, and a stale one hides the news that matters where the user actually is. ' +
+  'Search the web yourself, call ingest_news, then get_brief (its radar auto-rotates already-shown ' +
+  'items down). Only fall back to scan_news (Tavily) if you have no web search of your own. If a ' +
+  'profile has empty reachAnchors, infer a few per axis and offer to save them via update_profile.';
