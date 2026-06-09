@@ -38,7 +38,9 @@ export function buildSituationalContext(
       .split(',')
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
-    parts.forEach((p, i) => add(p, i === 0 ? REGION_LOCAL : REGION_COUNTRY));
+    parts.forEach((p, i) => {
+      add(p, i === 0 ? REGION_LOCAL : REGION_COUNTRY);
+    });
   };
   addLocation(userContext.location);
   if (userContext.region) {
