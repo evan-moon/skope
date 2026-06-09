@@ -51,6 +51,14 @@ export const SERVER_INSTRUCTIONS =
   'differ from home, and a stale one hides the news that matters where the user actually is. ' +
   'Search the web yourself, call ingest_news, then get_brief (its radar auto-rotates already-shown ' +
   'items down). Only fall back to scan_news (Tavily) if you have no web search of your own. ' +
+  "DIG IN (deep brief) — don't stop at one pass. Iterate up to ~3 search→ingest→get_brief rounds, " +
+  "each drilling DOWN the PRIOR report's own causal chains: mine round N's mechanism steps, its " +
+  'single-variable-to-watch, and its counter-current for the next-layer questions, then search ' +
+  'THOSE, ingest, and rebuild. Round 1 maps the throughline; round 2 searches the why/how beneath ' +
+  "it (throughline 'oil→CPI' → round 2 digs supercore stickiness, Hormuz tanker flows, the Fed " +
+  'reaction function); round 3 resolves the tensions round 2 surfaced. Each round must sharpen the ' +
+  'judgment and tighten the single variable — not merely pile on headlines. A quick check-in can be ' +
+  'one pass; a real brief digs. ' +
   'LIVING PROFILE — never hand-assemble what the system can build repeatably. On show_profile, read ' +
   '`gaps`. If needsOnboarding, build the profile from FEDERATION first, not from your assumptions: ' +
   'read firma (portfolio → asset keywords + macro reachAnchors, tag source "mcp://firma/portfolio") ' +
