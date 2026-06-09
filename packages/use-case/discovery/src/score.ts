@@ -6,11 +6,15 @@ import type {
   MatchType,
   ReachabilitySeed,
   ScoredArticle,
+  SituationalContext,
 } from '@skope/domain';
 
 /** Per-match-type base strength. geo/entity (direct) outrank a loose keyword brush. */
 const STRENGTH: Record<MatchType, number> = {
   geo: 1.0,
+  // A structural/ambient path (your region, or a systemic category you're exposed to) is a strong
+  // match *of its kind*; its low altitude comes from SITUATIONAL_WEIGHT, not from the strength.
+  situational: 1.0,
   entity: 0.9,
   keyword: 0.6,
   // A causal-upstream anchor reaches the user but isn't a direct mention — kept strictly below
@@ -30,6 +34,11 @@ const TIER_FACTORS: Record<number, number> = { 1: 1.0, 2: 0.9, 3: 0.85, 0: 0.6 }
 const GEO_AXIS = 'geo';
 /** Weight of the geo reachability path. Below a direct keyword hit, but enough to clear the radar. */
 const GEO_WEIGHT = 0.15;
+
+/** Virtual axis id for situational reachability — the broad/thin "world that can affect me" band. */
+const SITUATIONAL_AXIS = 'situational';
+/** Weight of a situational path. Low (broad/thin), but ADDITIVE so it co-occurs with personal hits. */
+const SITUATIONAL_WEIGHT = 0.15;
 
 function haystack(article: Article): string {
   return `${article.title} ${article.snippet ?? ''}`.toLowerCase();
@@ -109,6 +118,39 @@ function geoSeedsFor(article: Article, location?: string): ReachabilitySeed[] {
 }
 
 /**
+ * Situational reachability (the broad/thin band): does the article touch the user's region, or a
+ * systemic category they're structurally exposed to? Unlike geo, these are *additive* — a systemic
+ * shock (NZ earthquake, APAC cable cut) reaches the user even when a personal axis also matched; that
+ * co-occurrence is often the most important brief item. The closed systemic enum (passed in by the
+ * adapter) is the membership gate that keeps "world that can affect me" from becoming a firehose.
+ */
+function seedsForSituational(article: Article, ctx: SituationalContext): ReachabilitySeed[] {
+  const text = haystack(article);
+  const seeds: ReachabilitySeed[] = [];
+  for (const token of ctx.regionTokens) {
+    if (keywordMatches(text, token.toLowerCase().trim())) {
+      seeds.push({
+        axisId: SITUATIONAL_AXIS,
+        entity: token,
+        matchType: 'situational',
+        strength: STRENGTH.situational,
+      });
+    }
+  }
+  for (const cat of ctx.systemic) {
+    if (cat.keywords.some((kw) => keywordMatches(text, kw.toLowerCase().trim()))) {
+      seeds.push({
+        axisId: SITUATIONAL_AXIS,
+        entity: cat.id,
+        matchType: 'situational',
+        strength: STRENGTH.situational,
+      });
+    }
+  }
+  return seeds;
+}
+
+/**
  * The deterministic impact kernel. For each article, rule-match every axis, emit ReachabilitySeeds,
  * and roll them into a weighted ImpactScore. Tier-1 sources get a small reliability floor so a
  * trusted global anchor isn't dropped purely for lacking a keyword (it still needs *some* path to
@@ -116,7 +158,12 @@ function geoSeedsFor(article: Article, location?: string): ReachabilitySeed[] {
  *
  * The LLM later renders the causal-chain narrative from `seeds` — skope stores only the seed.
  */
-export function scoreArticle(article: Article, axes: Axis[], location?: string): ImpactScore {
+export function scoreArticle(
+  article: Article,
+  axes: Axis[],
+  location?: string,
+  situational?: SituationalContext,
+): ImpactScore {
   const hits: AxisHit[] = [];
   const seeds: ReachabilitySeed[] = [];
   // Trust damping is folded into each hit's contribution (not just the total) so it survives
@@ -131,6 +178,20 @@ export function scoreArticle(article: Article, axes: Axis[], location?: string):
     seeds.push(...axisSeeds);
     const best = Math.max(...axisSeeds.map((s) => s.strength));
     hits.push({ axisId: axis.id, contribution: axis.weight * best * tierFactor });
+  }
+
+  // Situational is ADDITIVE (not a floor): the broad/thin "world that can affect me" band rides
+  // alongside personal hits at a low weight, so a systemic shock surfaces even when an interest axis
+  // also matched. This is the key mechanics difference from the geo floor below.
+  if (situational) {
+    const sitSeeds = seedsForSituational(article, situational);
+    if (sitSeeds.length > 0) {
+      seeds.push(...sitSeeds);
+      hits.push({
+        axisId: SITUATIONAL_AXIS,
+        contribution: SITUATIONAL_WEIGHT * STRENGTH.situational * tierFactor,
+      });
+    }
   }
 
   // Geo is a FLOOR, not a bonus: it only carries an article in when no interest axis matched, so
@@ -161,10 +222,11 @@ export function scoreBatch(
   axes: Axis[],
   excluded: ReadonlySet<string> = new Set(),
   location?: string,
+  situational?: SituationalContext,
 ): ScoredArticle[] {
   return articles
     .filter((a) => !excluded.has(a.urlHash))
-    .map((a) => ({ ...a, impact: scoreArticle(a, axes, location) }))
+    .map((a) => ({ ...a, impact: scoreArticle(a, axes, location, situational) }))
     .filter((a) => a.impact.seeds.length > 0)
     .sort((a, b) => b.impact.total - a.impact.total);
 }

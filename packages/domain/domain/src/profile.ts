@@ -41,6 +41,36 @@ export interface UserContext {
   location: string;
   /** BCP-47-ish language preferences, most-preferred first, e.g. ["ko", "en"]. */
   languages: string[];
+  /**
+   * ISO 3166-1 alpha-2 of the user's *current* situation, e.g. "NZ". Optional; when present it keys
+   * the situational region lattice directly instead of best-effort parsing `location`. The user can
+   * be physically somewhere (current) different from their `location` home — situational scoring uses
+   * this to surface "world that can affect me where I am now".
+   */
+  country?: string;
+  /** Optional region/bloc token for the situational lattice, e.g. "APAC", "Oceania". */
+  region?: string;
+}
+
+/** One curated class of world-system whose state propagates to people structurally exposed to it. */
+export interface SystemicCategory {
+  /** Stable id, e.g. "sanctions", "natural-disaster". The seed entity for the situational axis. */
+  id: string;
+  /** Rule-match keyword set. A hit means the article is about this system. */
+  keywords: string[];
+}
+
+/**
+ * The deterministic inputs to *situational* reachability (the broad/thin band). Built by the adapter
+ * layer from UserContext (region tokens) + the static systemic-category enum + industry tags, then
+ * injected into scoring. skope matches these additively (a systemic shock reaches you even when a
+ * personal axis also matched) — distinct from the geo *floor* which only fires when nothing matched.
+ */
+export interface SituationalContext {
+  /** Location/region tokens the user is structurally exposed to, e.g. ["new zealand", "auckland"]. */
+  regionTokens: string[];
+  /** Curated systemic categories — the closed whitelist that keeps the broad band from a firehose. */
+  systemic: SystemicCategory[];
 }
 
 export interface Profile {

@@ -31,6 +31,8 @@ export const TIER2_BY_COUNTRY: Record<string, readonly string[]> = {
   FR: ['lemonde.fr', 'lefigaro.fr'],
   IN: ['thehindu.com', 'indianexpress.com'],
   BR: ['globo.com', 'folha.uol.com.br'],
+  NZ: ['rnz.co.nz', 'nzherald.co.nz', 'stuff.co.nz'],
+  AU: ['abc.net.au', 'smh.com.au', 'theage.com.au'],
 };
 
 /** Topic → domain-expert outlets. */
@@ -63,6 +65,13 @@ const COUNTRY_ALIASES: Record<string, string> = {
   india: 'IN',
   brazil: 'BR',
   brasil: 'BR',
+  'new zealand': 'NZ',
+  aotearoa: 'NZ',
+  auckland: 'NZ',
+  wellington: 'NZ',
+  australia: 'AU',
+  sydney: 'AU',
+  melbourne: 'AU',
 };
 
 /** Best-effort country resolution from a free-text location string. */

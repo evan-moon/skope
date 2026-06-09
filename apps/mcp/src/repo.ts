@@ -256,7 +256,7 @@ export class Repo {
         .map((r) => {
           const s = JSON.parse(r.matchSeed as string) as {
             entity: string;
-            matchType: 'keyword' | 'reach' | 'entity' | 'geo' | 'sector';
+            matchType: 'keyword' | 'reach' | 'situational' | 'entity' | 'geo' | 'sector';
             strength: number;
           };
           return {

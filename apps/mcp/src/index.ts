@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createSearchProvider, normalizeArticles } from '@skope/adapters';
+import { buildSituationalContext, createSearchProvider, normalizeArticles } from '@skope/adapters';
 import { assembleBrief } from '@skope/brief';
 import { scoreBatch } from '@skope/discovery';
 import type { Article, Axis, Profile, RawArticle, SearchQuery } from '@skope/domain';
@@ -80,7 +80,13 @@ function ingest(profile: Profile, articles: Article[], queryCount: number) {
     return true;
   });
   repo.recordArticles(fresh);
-  const scored = scoreBatch(fresh, profile.axes, repo.exclusionSet(), profile.userContext.location);
+  const scored = scoreBatch(
+    fresh,
+    profile.axes,
+    repo.exclusionSet(),
+    profile.userContext.location,
+    buildSituationalContext(profile.userContext),
+  );
   repo.recordScored(scored);
   const now = Date.now();
   repo.recordScan(queryCount, fresh.length);
@@ -120,9 +126,25 @@ server.tool(
   {
     axes: z.array(axisSchema).optional().describe('Full axis set to replace the current one.'),
     user_context: z
-      .object({ location: z.string(), languages: z.array(z.string()).default(['en']) })
+      .object({
+        location: z.string(),
+        languages: z.array(z.string()).default(['en']),
+        country: z
+          .string()
+          .optional()
+          .describe(
+            'ISO 3166-1 alpha-2 of the CURRENT situation (e.g. "NZ"). Drives Tier-2 + region.',
+          ),
+        region: z
+          .string()
+          .optional()
+          .describe('Bloc token for the situational lattice, e.g. "APAC".'),
+      })
       .optional()
-      .describe('Where/how the user lives. Drives geographic reachability and Tier-2 sources.'),
+      .describe(
+        'Where/how the user lives NOW. Drives geographic + situational reachability and Tier-2 ' +
+          'sources. Keep it fresh from conversation/memex — current location can differ from home.',
+      ),
   },
   async ({ axes, user_context }) => {
     const current = repo.loadProfile();
