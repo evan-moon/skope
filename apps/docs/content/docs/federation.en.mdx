@@ -1,6 +1,6 @@
 ---
 title: Federation
-description: skope owns its profile. firma and memex are optional adapters Claude reads — never dependencies skope imports.
+description: skope owns its profile. firma and memex are optional adapters Claude reads, never dependencies skope imports.
 ---
 
 skope is part of the **Herald** ecosystem, alongside [firma](https://github.com/evan-moon/firma) (assets) and [memex](https://github.com/evan-moon/memex) (memory). They share a design rule: **federation, not dependency.**
@@ -14,7 +14,7 @@ firma ──▶ Claude reads it ──▶ update_profile ──▶ skope's profi
 memex ──▶ Claude reads it ──▶ update_profile ──▶ skope's profile
 ```
 
-Claude is the integrator. It reads firma or memex with their own tools, decides what's relevant to your reachability, and writes axes into skope. skope sees only the resulting profile — it has no idea firma or memex exist.
+Claude is the integrator. It reads firma or memex with their own tools, decides what's relevant to your reachability, and writes axes into skope. skope sees only the resulting profile, it has no idea firma or memex exist.
 
 ## Why not import firma directly?
 

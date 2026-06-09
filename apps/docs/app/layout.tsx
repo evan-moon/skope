@@ -12,7 +12,7 @@ const SITE_URL = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'skope — news that reaches you',
+  title: 'skope: news that reaches you',
   description:
     'Local-first personalized news intelligence. A lens + watcher on the world: Claude scans, skope keeps only what has a path to you (Reachability), and warns you against your own bubble. MCP · SQLite · no API key.',
   icons: {
@@ -28,11 +28,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'skope: the news that reaches you',
     description:
-      'Stop hunting the news. Claude scans the world, skope keeps only what reaches you — and watches you against your own bubble. Local-first, MCP, no API key.',
+      'Stop hunting the news. Claude scans the world, skope keeps only what reaches you, and watches you against your own bubble. Local-first, MCP, no API key.',
     url: 'https://github.com/evan-moon/skope',
     siteName: 'skope',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'skope — news that reaches you' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'skope: news that reaches you' }],
   },
   twitter: {
     card: 'summary_large_image',

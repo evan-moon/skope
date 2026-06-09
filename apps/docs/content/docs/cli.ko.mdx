@@ -1,6 +1,6 @@
 ---
 title: CLI 레퍼런스
-description: skope CLI는 안전망입니다 — 셋업, 수동 프로필 편집, 읽기 전용 점검. 분석은 MCP 서버에 있습니다.
+description: skope CLI는 안전망입니다, 셋업, 수동 프로필 편집, 읽기 전용 점검. 분석은 MCP 서버에 있습니다.
 ---
 
 CLI는 의도적으로 작습니다. skope 설계상 **분석과 합성은 MCP 툴**입니다. CLI는 셋업, 수동 프로필 편집, 그리고 Claude 앞에 있지 않을 때의 읽기 전용 점검을 위해 존재합니다.
@@ -53,8 +53,8 @@ skope mcp install
 
 ```
 ~/.skope/
-  skope.db        — 프로필, 기사 원장, 읽음 로그 (SQLite)
-  config.json     — 선택적 Tavily 키
+  skope.db, 프로필, 기사 원장, 읽음 로그 (SQLite)
+  config.json, 선택적 Tavily 키
 ```
 
 CLI와 MCP 서버는 같은 `~/.skope/skope.db`를 공유합니다. 그래서 CLI로 편집한 프로필이 Claude에게 즉시 보이고, 반대도 마찬가지입니다.

@@ -1,9 +1,9 @@
 ---
 title: Concentration
-description: The echo-chamber watcher — Effective-N measures how many axes your attention actually spreads across.
+description: The echo-chamber watcher, Effective-N measures how many axes your attention actually spreads across.
 ---
 
-A lens that only ever points one direction is still a blind spot. skope watches your *own* news diet and warns you when it collapses onto too few dimensions — even when every article is individually reachable. This is the **concentration watcher**.
+A lens that only ever points one direction is still a blind spot. skope watches your *own* news diet and warns you when it collapses onto too few dimensions, even when every article is individually reachable. This is the **concentration watcher**.
 
 ## Effective-N
 
@@ -13,23 +13,23 @@ skope measures attention spread with **Effective-N**, the [Inverse Simpson index
 Effective-N = 1 / Σ(pᵢ²)
 ```
 
-where `pᵢ` is the share of total impact landing on axis `i` over the recent window. It answers: *"effectively how many axes is my attention spread across?"* — discounting axes that barely register.
+where `pᵢ` is the share of total impact landing on axis `i` over the recent window. It answers: *"effectively how many axes is my attention spread across?"*, discounting axes that barely register.
 
 - **Effective-N ≈ your axis count** → balanced. Your attention tracks your whole situation.
-- **Effective-N ≈ 1** → concentrated. Almost everything reaching you is one story — your portfolio, or one employer, or one technology.
+- **Effective-N ≈ 1** → concentrated. Almost everything reaching you is one story, your portfolio, or one employer, or one technology.
 
-Five axes each at 20% gives Effective-N = 5. But 80% on one axis and 5% on four others gives Effective-N ≈ 1.5 — nominally five axes, effectively one and a half.
+Five axes each at 20% gives Effective-N = 5. But 80% on one axis and 5% on four others gives Effective-N ≈ 1.5, nominally five axes, effectively one and a half.
 
 ## Why concentration is the risk
 
-Reachability already keeps the irrelevant out. The remaining failure mode is the opposite one: everything that reaches you is *true*, *relevant*, and *pointed the same way*. That's an echo chamber built from real signal — the hardest kind to notice from the inside, because nothing in it is wrong. Effective-N makes the shape of your attention legible so the collapse is visible before it becomes a habit.
+Reachability already keeps the irrelevant out. The remaining failure mode is the opposite one: everything that reaches you is *true*, *relevant*, and *pointed the same way*. That's an echo chamber built from real signal, the hardest kind to notice from the inside, because nothing in it is wrong. Effective-N makes the shape of your attention legible so the collapse is visible before it becomes a habit.
 
 ## Reading it in the brief
 
-[`get_brief`](/en/docs/mcp-tools#get_brief) returns a `concentration` block alongside the radar. A low Effective-N is Claude's cue to flag the imbalance — *"four of your last five briefs were your portfolio; here's what you're not seeing"* — and, in a later version, to actively recommend a diverging query set.
+[`get_brief`](/en/docs/mcp-tools#get_brief) returns a `concentration` block alongside the radar. A low Effective-N is Claude's cue to flag the imbalance (*"four of your last five briefs were your portfolio; here's what you're not seeing"*) and, in a later version, to actively recommend a diverging query set.
 
 ## Deterministic, like the rest of the ledger
 
-Effective-N is pure math over the stored impact distribution — no model, no judgement call. skope computes the number; Claude interprets what to do about it. Same division of labor as everywhere else in skope: **the ledger is deterministic, the synthesis is Claude's.**
+Effective-N is pure math over the stored impact distribution, no model, no judgement call. skope computes the number; Claude interprets what to do about it. Same division of labor as everywhere else in skope: **the ledger is deterministic, the synthesis is Claude's.**
 
 See also: [Reachability](/en/docs/reachability), the lens that decides what enters the radar in the first place.

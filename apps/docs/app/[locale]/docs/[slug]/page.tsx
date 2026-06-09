@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<RouteParams
   if (!doc) return {};
   const suffix = locale === 'ko' ? 'skope 문서' : 'skope Docs';
   return {
-    title: `${doc.frontmatter.title} — ${suffix}`,
+    title: `${doc.frontmatter.title} · ${suffix}`,
     description: doc.frontmatter.description,
   };
 }

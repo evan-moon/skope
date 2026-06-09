@@ -1,13 +1,13 @@
 ---
 title: CLI Reference
-description: The skope CLI is the safety net — setup, manual profile editing, and read-only inspection. Analysis lives in the MCP server.
+description: The skope CLI is the safety net, setup, manual profile editing, and read-only inspection. Analysis lives in the MCP server.
 ---
 
-The CLI is deliberately small. Per skope's design, **analysis and synthesis are MCP tools** — the CLI exists for setup, manual profile editing, and read-only inspection when you're not in front of Claude.
+The CLI is deliberately small. Per skope's design, **analysis and synthesis are MCP tools**, the CLI exists for setup, manual profile editing, and read-only inspection when you're not in front of Claude.
 
 ## skope init
 
-Create a cold-start profile from your location — no MCP integrations or LLM required.
+Create a cold-start profile from your location, no MCP integrations or LLM required.
 
 ```bash
 skope init --location "Seoul, Korea" --languages ko,en
@@ -53,8 +53,8 @@ Restart Claude Desktop to activate; Claude Code picks it up on the next session.
 
 ```
 ~/.skope/
-  skope.db        — profile, article ledger, read log (SQLite)
-  config.json     — optional Tavily key
+  skope.db, profile, article ledger, read log (SQLite)
+  config.json, optional Tavily key
 ```
 
 The CLI and the MCP server share the same `~/.skope/skope.db`, so a profile you edit with the CLI is immediately visible to Claude, and vice-versa.

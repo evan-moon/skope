@@ -48,7 +48,7 @@ const COPY: Record<Locale, Copy> = {
     sub: (
       <>
         Stop hunting the news. Claude scans the world, skope keeps only what has a causal path to
-        your life — your money, your work, your country — and watches you against your own bubble.
+        your life (your money, your work, your country) and watches you against your own bubble.
         Local-first. No account. No API key.
       </>
     ),
@@ -98,7 +98,7 @@ const COPY: Record<Locale, Copy> = {
     chainNote: (
       <>
         Three steps, every one of them to you. A &ldquo;Rio street festival&rdquo; headline? Zero
-        path — you&apos;ll never see it.
+        path, you&apos;ll never see it.
       </>
     ),
     feats: [
@@ -107,7 +107,7 @@ const COPY: Record<Locale, Copy> = {
         title: 'A lens, not a filter',
         body: (
           <>
-            Relevance is <em>Reachability</em> — does a causal path reach you? — not keyword
+            Relevance is <em>Reachability</em> (does a causal path reach you?) not keyword
             matching. Broadened without being flooded.
           </>
         ),
@@ -135,7 +135,7 @@ const COPY: Record<Locale, Copy> = {
     ],
     family: (
       <>
-        Part of the <strong>Herald</strong> family —{' '}
+        Part of the <strong>Herald</strong> family, {' '}
         <a href="https://github.com/evan-moon/firma">firma</a> (your money),{' '}
         <a href="https://github.com/evan-moon/memex">memex</a> (your memory), and skope (your news).
         One principle: your data stays on your machine, and the AI comes to it.
@@ -154,7 +154,7 @@ const COPY: Record<Locale, Copy> = {
     hook: 'Claude에게 물어보기만 하세요.',
     sub: (
       <>
-        뉴스를 사냥하지 마세요. Claude가 세상을 훑고, skope는 당신의 삶 — 돈, 일, 나라 — 으로
+        뉴스를 사냥하지 마세요. Claude가 세상을 훑고, skope는 당신의 삶 (돈, 일, 나라) 으로
         이어지는 인과 경로가 있는 것만 남깁니다. 그리고 당신을 당신의 거품으로부터 지켜봅니다.
         로컬 우선. 계정 없음. API 키 없음.
       </>
@@ -205,7 +205,7 @@ const COPY: Record<Locale, Copy> = {
     chainNote: (
       <>
         세 단계, 그 모든 단계가 당신으로 향합니다. &ldquo;리우 거리 축제&rdquo; 헤드라인? 경로 없음
-        — 절대 보이지 않습니다.
+, 절대 보이지 않습니다.
       </>
     ),
     feats: [
@@ -214,7 +214,7 @@ const COPY: Record<Locale, Copy> = {
         title: '필터가 아니라 렌즈',
         body: (
           <>
-            관련성은 <em>Reachability</em>입니다 — 인과 경로가 당신에게 닿는가? — 키워드 매칭이
+            관련성은 <em>Reachability</em>입니다 (인과 경로가 당신에게 닿는가?) 키워드 매칭이
             아니라. 넓히되 범람하지 않습니다.
           </>
         ),
@@ -242,7 +242,7 @@ const COPY: Record<Locale, Copy> = {
     ],
     family: (
       <>
-        <strong>Herald</strong> 패밀리의 일원 —{' '}
+        <strong>Herald</strong> 패밀리의 일원, {' '}
         <a href="https://github.com/evan-moon/firma">firma</a> (당신의 돈),{' '}
         <a href="https://github.com/evan-moon/memex">memex</a> (당신의 기억), 그리고 skope (당신의
         뉴스). 하나의 원칙: 데이터는 당신의 기기에 남고, AI가 그곳으로 옵니다.
