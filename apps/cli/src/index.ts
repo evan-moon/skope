@@ -55,6 +55,7 @@ program
           label: a.label,
           weight: a.weight,
           keywords: JSON.stringify(a.keywords),
+          reachAnchors: JSON.stringify(a.reachAnchors ?? []),
           source: null,
         })
         .run();

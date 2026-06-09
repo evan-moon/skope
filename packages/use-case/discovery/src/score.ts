@@ -13,6 +13,9 @@ const STRENGTH: Record<MatchType, number> = {
   geo: 1.0,
   entity: 0.9,
   keyword: 0.6,
+  // A causal-upstream anchor reaches the user but isn't a direct mention — kept strictly below
+  // `keyword` so a direct TSLA hit always outranks a second-order "USD strength" article.
+  reach: 0.5,
   sector: 0.5,
 };
 
@@ -49,13 +52,23 @@ function keywordMatches(text: string, needle: string): boolean {
   return text.includes(needle);
 }
 
-/** Rule-match a single axis against an article, emitting reachability seeds for each keyword hit. */
+/**
+ * Rule-match a single axis against an article. Two passes: direct `keywords` emit a 'keyword' seed
+ * (0.6); causal-upstream `reachAnchors` emit a weaker 'reach' seed (0.5). The reach pass is what
+ * broadens the lens — an article that names "Fed" but not "TSLA" now gets a path to the asset axis
+ * instead of being dropped as zero-seed, while best-strength selection keeps direct hits on top.
+ */
 function seedsForAxis(article: Article, axis: Axis): ReachabilitySeed[] {
   const text = haystack(article);
   const seeds: ReachabilitySeed[] = [];
   for (const kw of axis.keywords) {
     if (keywordMatches(text, kw.toLowerCase().trim())) {
       seeds.push({ axisId: axis.id, entity: kw, matchType: 'keyword', strength: STRENGTH.keyword });
+    }
+  }
+  for (const anchor of axis.reachAnchors ?? []) {
+    if (keywordMatches(text, anchor.toLowerCase().trim())) {
+      seeds.push({ axisId: axis.id, entity: anchor, matchType: 'reach', strength: STRENGTH.reach });
     }
   }
   return seeds;

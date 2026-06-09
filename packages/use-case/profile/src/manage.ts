@@ -4,10 +4,10 @@ import { normalizeAxes } from './normalize.ts';
 /** The default seed axes — a *starting point*, fully overridable. Not a fixed truth about anyone. */
 export function seedAxes(): Axis[] {
   return normalizeAxes([
-    { id: 'asset', label: 'Asset exposure', weight: 0.4, keywords: [] },
-    { id: 'career', label: 'Career', weight: 0.3, keywords: [] },
-    { id: 'knowledge', label: 'Knowledge & identity', weight: 0.2, keywords: [] },
-    { id: 'general', label: 'World headlines', weight: 0.1, keywords: [] },
+    { id: 'asset', label: 'Asset exposure', weight: 0.4, keywords: [], reachAnchors: [] },
+    { id: 'career', label: 'Career', weight: 0.3, keywords: [], reachAnchors: [] },
+    { id: 'knowledge', label: 'Knowledge & identity', weight: 0.2, keywords: [], reachAnchors: [] },
+    { id: 'general', label: 'World headlines', weight: 0.1, keywords: [], reachAnchors: [] },
   ]);
 }
 

@@ -1,11 +1,13 @@
 /**
  * How an article's mention connects to an axis. Deterministic, rule-computed.
- * - keyword: a profile keyword appears (e.g. "TSLA")
+ * - keyword: a direct profile keyword appears (e.g. "TSLA")
+ * - reach  : a causal-upstream anchor of an axis appears (e.g. "Fed", "USD/KRW" for an asset axis) —
+ *            no direct mention, but a path reaches the user. Scored below keyword so direct hits win.
  * - entity : a resolved named entity matches (ticker, employer, person)
  * - geo    : the user's location/country is the subject
  * - sector : same sector/industry as a held entity
  */
-export type MatchType = 'keyword' | 'entity' | 'geo' | 'sector';
+export type MatchType = 'keyword' | 'reach' | 'entity' | 'geo' | 'sector';
 
 /**
  * The deterministic kernel of Reachability. skope stores ONLY this seed — the LLM renders the

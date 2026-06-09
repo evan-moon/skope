@@ -1,1 +1,1 @@
-export { type AssembleInput, assembleBrief } from './assemble.ts';
+export { type AssembleInput, assembleBrief, freshnessDecay } from './assemble.ts';

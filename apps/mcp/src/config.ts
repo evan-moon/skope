@@ -35,6 +35,11 @@ export const SERVER_INSTRUCTIONS =
   'collector: YOU search the web with your own tools, then hand results to skope, which owns the ' +
   'deterministic ledger only (dedup, trust-tier, rule scoring, Effective-N). You also render the ' +
   'causal-chain narrative from the rule-match seeds skope returns and synthesize the brief prose. ' +
-  'For a vague ask like "today\'s news": call show_profile, generate a query set across the axes, ' +
-  'search the web yourself, call ingest_news with the results, then get_brief. Only fall back to ' +
-  'scan_news (Tavily) if you have no web search of your own.';
+  'For a vague ask like "today\'s news": call show_profile, then generate a query set that expands ' +
+  "BOTH each axis's keywords (the literal entities) AND its reachAnchors (causal-upstream topics " +
+  'that reach the user without naming the entity — e.g. "Fed rate", "USD/KRW" for a TSLA holder). ' +
+  'Searching only the literal keywords is what makes briefs feel repetitive; the anchors are the ' +
+  'lens. Search the web yourself, call ingest_news with the results, then get_brief (its radar ' +
+  'auto-rotates already-shown items down). Only fall back to scan_news (Tavily) if you have no web ' +
+  'search of your own. If a profile has empty reachAnchors, infer a few per axis and offer to save ' +
+  'them via update_profile.';

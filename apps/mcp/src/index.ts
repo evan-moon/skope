@@ -29,7 +29,14 @@ const axisSchema = z.object({
   id: z.string(),
   label: z.string(),
   weight: z.number(),
-  keywords: z.array(z.string()).default([]),
+  keywords: z.array(z.string()).default([]).describe('Direct anchors — what this axis is about.'),
+  reachAnchors: z
+    .array(z.string())
+    .default([])
+    .describe(
+      'Causal-upstream anchors that reach this axis without naming it (e.g. for a TSLA axis: ' +
+        '"Fed rate", "USD/KRW", "BYD", "lithium"). Broadens the lens; scored below direct keywords.',
+    ),
   source: z.string().optional(),
 });
 
@@ -137,8 +144,10 @@ server.tool(
 server.tool(
   'ingest_news',
   'PRIMARY collection path — no API key. YOU search the web yourself (your own web-search tool), ' +
-    "then hand the results here. Generate queries from the profile axes; prefer the user's Tier-1/2 " +
-    'trusted outlets and articles newer than the profile last_scan. skope canonicalizes URLs, ' +
+    "then hand the results here. Generate queries from BOTH each axis's keywords (direct) AND its " +
+    'reachAnchors (causal-upstream) — the anchors are what broadens the lens beyond the literal ' +
+    "profile terms. Prefer the user's Tier-1/2 trusted outlets and articles newer than last_scan. " +
+    'skope canonicalizes URLs, ' +
     'derives the trust tier from each source, dedups by URL hash, rule-scores reachability against ' +
     'the profile, and persists to the ledger. Returns how many entered the radar.',
   {
@@ -150,7 +159,7 @@ server.tool(
     if (!profile) {
       return err('No profile. Call update_profile first.');
     }
-    const topics = profile.axes.flatMap((a) => [a.id, ...a.keywords]);
+    const topics = profile.axes.flatMap((a) => [a.id, ...a.keywords, ...(a.reachAnchors ?? [])]);
     const raw: RawArticle[] = articles.map((a) => ({
       url: a.url,
       title: a.title,
@@ -185,7 +194,7 @@ server.tool(
           '~/.skope/config.json { "tavily_api_key": "..." }.',
       );
     }
-    const topics = profile.axes.flatMap((a) => [a.id, ...a.keywords]);
+    const topics = profile.axes.flatMap((a) => [a.id, ...a.keywords, ...(a.reachAnchors ?? [])]);
     const provider = createSearchProvider({
       apiKey,
       location: profile.userContext.location,
@@ -204,7 +213,9 @@ server.tool(
   'Assemble the two-layer brief from the ledger (no web fetch): [radar] reachability-scored news ' +
     'toward the user + [world] top global headlines (shown regardless of relevance) + the ' +
     'Effective-N concentration meter. Render the causal-chain narrative yourself from each ' +
-    "article's impact.seeds; synthesize the prose. Run ingest_news first if the ledger is stale.",
+    "article's impact.seeds; synthesize the prose. The radar auto-rotates — articles shown in a " +
+    'recent brief are demoted (not dropped) so each brief surfaces newer items. Run ingest_news ' +
+    'first if the ledger is stale.',
   {},
   async () => {
     const profile = repo.loadProfile();
@@ -216,7 +227,11 @@ server.tool(
     const radarHashes = new Set(scored.map((a) => a.urlHash));
     const world = repo.recentWorld(24, 5, radarHashes);
     const axisTotals = repo.axisTotals(14);
-    const brief = assembleBrief({ scored, world, axisTotals });
+    // Read prior appearances BEFORE assembling so the freshness decay demotes already-shown items;
+    // record this render's radar AFTER, so a brief never penalizes itself — only the next one.
+    const lastShownAt = repo.lastShownMap();
+    const brief = assembleBrief({ scored, world, axisTotals, lastShownAt });
+    repo.recordAppearances(brief.radar.map((a) => a.urlHash));
     return ok(brief);
   },
 );

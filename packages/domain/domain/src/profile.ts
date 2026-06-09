@@ -18,8 +18,16 @@ export interface Axis {
   label: string;
   /** Relative importance. Across all axes, weights are normalized to sum to 1.0. */
   weight: number;
-  /** Free-text anchors the LLM expands into search queries, e.g. ["TSLA", "Toss", "React"]. */
+  /** Direct anchors — the literal entities this axis is *about*, e.g. ["TSLA", "Toss", "React"]. */
   keywords: string[];
+  /**
+   * Causal-upstream anchors: things that *reach* this axis without naming it, e.g. for an asset axis
+   * holding TSLA — ["Fed rate", "USD/KRW", "BYD", "lithium"]. The LLM expands these into search
+   * queries too (broadening the lens) and the scorer matches them at the weaker 'reach' strength, so
+   * a causally-reachable article enters the radar but still ranks below a direct keyword hit.
+   * Optional — absent means "direct keywords only" (legacy profiles round-trip as []).
+   */
+  reachAnchors?: string[];
   /**
    * Optional federation source the profile was bootstrapped from, e.g. "mcp://firma/portfolio".
    * Informational only — skope does not call it. Present means "an LLM filled this from elsewhere".

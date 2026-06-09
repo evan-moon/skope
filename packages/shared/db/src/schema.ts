@@ -9,8 +9,10 @@ export const profileAxes = sqliteTable('profile_axes', {
   id: text('id').primaryKey(),
   label: text('label').notNull(),
   weight: real('weight').notNull(),
-  /** JSON-encoded string[] of keyword anchors. */
+  /** JSON-encoded string[] of direct keyword anchors. */
   keywords: text('keywords').notNull().default('[]'),
+  /** JSON-encoded string[] of causal-upstream anchors (scored at the weaker 'reach' strength). */
+  reachAnchors: text('reach_anchors').notNull().default('[]'),
   /** Optional federation origin, e.g. "mcp://firma/portfolio". Informational only. */
   source: text('source'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(sql`(unixepoch() * 1000)`),
@@ -52,6 +54,16 @@ export const articleImpacts = sqliteTable('article_impacts', {
   score: real('score').notNull(),
   /** JSON-encoded ReachabilitySeed: { entity, matchType, strength }. */
   matchSeed: text('match_seed'),
+});
+
+/**
+ * Brief novelty log: when an article was last *shown* in a brief (not read — shown). Drives the
+ * read-time freshness decay so a just-surfaced article sinks below genuinely new ones next brief.
+ * Distinct from `interactions`: shown ≠ consumed. Never feeds the deterministic ledger / Effective-N.
+ */
+export const briefAppearances = sqliteTable('brief_appearances', {
+  urlHash: text('url_hash').primaryKey(),
+  shownAt: integer('shown_at', { mode: 'timestamp_ms' }).default(sql`(unixepoch() * 1000)`),
 });
 
 /** Feedback ledger: read/mute. Drives deterministic exclusion from future briefs. */

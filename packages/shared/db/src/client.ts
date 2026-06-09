@@ -36,6 +36,7 @@ function ensureSchema(sqlite: Database.Database): void {
       label TEXT NOT NULL,
       weight REAL NOT NULL,
       keywords TEXT NOT NULL DEFAULT '[]',
+      reach_anchors TEXT NOT NULL DEFAULT '[]',
       source TEXT,
       created_at INTEGER DEFAULT (unixepoch() * 1000)
     );
@@ -60,6 +61,10 @@ function ensureSchema(sqlite: Database.Database): void {
       axis_id TEXT NOT NULL,
       score REAL NOT NULL,
       match_seed TEXT
+    );
+    CREATE TABLE IF NOT EXISTS brief_appearances (
+      url_hash TEXT PRIMARY KEY,
+      shown_at INTEGER DEFAULT (unixepoch() * 1000)
     );
     CREATE TABLE IF NOT EXISTS interactions (
       url_hash TEXT PRIMARY KEY,
@@ -86,6 +91,13 @@ function migrateSchema(sqlite: Database.Database): void {
   const cols = sqlite.prepare('PRAGMA table_info(articles_seen)').all() as { name: string }[];
   if (!cols.some((c) => c.name === 'content_hash')) {
     sqlite.exec('ALTER TABLE articles_seen ADD COLUMN content_hash TEXT');
+  }
+
+  // profile_axes.reach_anchors holds the causal-upstream anchors. Older ledgers predate the column;
+  // the NOT NULL DEFAULT '[]' makes existing rows round-trip as "direct keywords only".
+  const axisCols = sqlite.prepare('PRAGMA table_info(profile_axes)').all() as { name: string }[];
+  if (!axisCols.some((c) => c.name === 'reach_anchors')) {
+    sqlite.exec("ALTER TABLE profile_axes ADD COLUMN reach_anchors TEXT NOT NULL DEFAULT '[]'");
   }
 
   // article_impacts.axis_id once carried a FK to profile_axes(id). Scoring now emits a virtual 'geo'

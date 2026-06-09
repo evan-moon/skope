@@ -4,7 +4,15 @@ import { contentKey, daysAgo } from '@skope/utils';
 import type { AxisImpactTotals } from '@skope/watch';
 import { and, gte, inArray, sql } from 'drizzle-orm';
 
-const { profileAxes, profileMeta, articlesSeen, articleImpacts, interactions, scanLog } = schema;
+const {
+  profileAxes,
+  profileMeta,
+  articlesSeen,
+  articleImpacts,
+  briefAppearances,
+  interactions,
+  scanLog,
+} = schema;
 
 /**
  * The deterministic ledger boundary. Everything that mutates ~/.skope/skope.db lives here; tool
@@ -38,6 +46,7 @@ export class Repo {
         label: a.label,
         weight: a.weight,
         keywords: JSON.parse(a.keywords) as string[],
+        reachAnchors: JSON.parse(a.reachAnchors) as string[],
         source: a.source ?? undefined,
       })),
     };
@@ -53,6 +62,7 @@ export class Repo {
           label: a.label,
           weight: a.weight,
           keywords: JSON.stringify(a.keywords),
+          reachAnchors: JSON.stringify(a.reachAnchors ?? []),
           source: a.source ?? null,
         })
         .run();
@@ -174,6 +184,34 @@ export class Repo {
     return rows.map((r) => ({ axisId: r.axisId, total: Number(r.total ?? 0) }));
   }
 
+  /**
+   * Stamp `now` as the last-shown time for the given articles. Called by get_brief AFTER it has read
+   * the prior stamps, so a brief never penalizes its own current render — only the next one. "Shown",
+   * not "read": this never enters the deterministic ledger or Effective-N.
+   */
+  recordAppearances(urlHashes: string[], when: number = Date.now()): void {
+    const shownAt = new Date(when);
+    for (const urlHash of urlHashes) {
+      this.db
+        .insert(briefAppearances)
+        .values({ urlHash, shownAt })
+        .onConflictDoUpdate({ target: briefAppearances.urlHash, set: { shownAt } })
+        .run();
+    }
+  }
+
+  /** url_hash → epoch-ms last shown in a brief, for the read-time freshness decay. */
+  lastShownMap(): Map<string, number> {
+    const rows = this.db.select().from(briefAppearances).all();
+    const map = new Map<string, number>();
+    for (const r of rows) {
+      if (r.shownAt) {
+        map.set(r.urlHash, r.shownAt.getTime());
+      }
+    }
+    return map;
+  }
+
   markRead(urlHashes: string[]): void {
     for (const urlHash of urlHashes) {
       this.db
@@ -218,7 +256,7 @@ export class Repo {
         .map((r) => {
           const s = JSON.parse(r.matchSeed as string) as {
             entity: string;
-            matchType: 'keyword' | 'entity' | 'geo' | 'sector';
+            matchType: 'keyword' | 'reach' | 'entity' | 'geo' | 'sector';
             strength: number;
           };
           return {
