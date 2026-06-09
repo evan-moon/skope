@@ -103,9 +103,9 @@ function migrateSchema(sqlite: Database.Database): void {
   // article_impacts.axis_id once carried a FK to profile_axes(id). Scoring now emits a virtual 'geo'
   // axis with no profile row, so the stale FK rejects every geo impact ("FOREIGN KEY constraint
   // failed"). Rebuild the table without the constraint, preserving rows.
-  const fks = sqlite
-    .prepare('PRAGMA foreign_key_list(article_impacts)')
-    .all() as { table: string }[];
+  const fks = sqlite.prepare('PRAGMA foreign_key_list(article_impacts)').all() as {
+    table: string;
+  }[];
   if (fks.some((fk) => fk.table === 'profile_axes')) {
     const fkPrev = sqlite.pragma('foreign_keys', { simple: true });
     sqlite.pragma('foreign_keys = OFF'); // a no-op inside a txn, so toggle before BEGIN
