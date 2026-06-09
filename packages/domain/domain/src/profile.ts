@@ -80,3 +80,25 @@ export interface Profile {
   /** Epoch ms of the last scan; scan_news fetches incrementally after this. */
   lastScan?: number;
 }
+
+/** Per-axis completeness, so the orchestrator knows what onboarding/refresh still needs to fill. */
+export interface AxisGap {
+  id: string;
+  keywords: number;
+  reachAnchors: number;
+  /** True if the axis carries a federation `source` (filled from firma/memex), not a cold-start seed. */
+  federated: boolean;
+}
+
+/**
+ * Deterministic completeness signal for the profile — the onboarding/refresh trigger. skope reports
+ * only its own internal state (empty keyword/anchor buckets, federation provenance); it cannot know
+ * whether firma/memex are connected (federation, not dependency) — that is the orchestrator's to see.
+ */
+export interface ProfileGaps {
+  /** Any interest axis (non-'general') has zero keywords → radar is near-dead, run onboarding. */
+  needsOnboarding: boolean;
+  /** Any interest axis has keywords but zero reachAnchors → lens is keyword-narrow, broaden it. */
+  lensNarrow: boolean;
+  perAxis: AxisGap[];
+}

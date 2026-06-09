@@ -5,7 +5,7 @@ import { buildSituationalContext, createSearchProvider, normalizeArticles } from
 import { assembleBrief } from '@skope/brief';
 import { scoreBatch } from '@skope/discovery';
 import type { Article, Axis, Profile, RawArticle, SearchQuery } from '@skope/domain';
-import { normalizeAxes } from '@skope/profile';
+import { normalizeAxes, profileGaps } from '@skope/profile';
 import { contentKey, urlHash } from '@skope/utils';
 import { z } from 'zod';
 import { getTavilyKey, SERVER_INSTRUCTIONS, SKOPE_VERSION } from './config.ts';
@@ -59,7 +59,12 @@ const ingestArticleSchema = z.object({
  * drop already-seen, persist to the ledger, advance last_scan. Identical regardless of whether the
  * articles came from the LLM (ingest_news) or Tavily (scan_news).
  */
-function ingest(profile: Profile, articles: Article[], queryCount: number) {
+function ingest(
+  profile: Profile,
+  articles: Article[],
+  queryCount: number,
+  currentLocation?: string,
+) {
   // Skip articles already in the ledger — re-ingest is idempotent, so impacts never double-count
   // and the Effective-N watcher stays honest. Two-key dedup: url hash, plus a content key
   // (source+title) that catches the same story re-arriving under URL-parameter variants.
@@ -85,7 +90,7 @@ function ingest(profile: Profile, articles: Article[], queryCount: number) {
     profile.axes,
     repo.exclusionSet(),
     profile.userContext.location,
-    buildSituationalContext(profile.userContext),
+    buildSituationalContext(profile.userContext, currentLocation),
   );
   repo.recordScored(scored);
   const now = Date.now();
@@ -103,8 +108,10 @@ function ingest(profile: Profile, articles: Article[], queryCount: number) {
 
 server.tool(
   'show_profile',
-  'Return the current interest profile: axes (id, label, normalized weight, keywords), user context ' +
-    '(location, languages), and last scan time. Empty means the profile needs setup via update_profile.',
+  'Return the current interest profile: axes (id, label, normalized weight, keywords, reachAnchors, ' +
+    'federation source), user context, last scan time, and a `gaps` report (needsOnboarding / ' +
+    'lensNarrow / per-axis keyword+anchor counts + federated flag). Use `gaps` to decide whether to ' +
+    'run the onboarding/refresh playbook. Empty means the profile needs setup via update_profile.',
   {},
   async () => {
     const profile = repo.loadProfile();
@@ -114,7 +121,7 @@ server.tool(
         hint: 'No profile yet. Call update_profile with axes + user_context.',
       });
     }
-    return ok(profile);
+    return ok({ ...profile, gaps: profileGaps(profile) });
   },
 );
 
@@ -175,8 +182,16 @@ server.tool(
   {
     articles: z.array(ingestArticleSchema).min(1).describe('Web-search results you collected.'),
     query_context: z.string().optional().describe('What you searched for (audit only).'),
+    current_location: z
+      .string()
+      .optional()
+      .describe(
+        'Where the user physically is NOW if it differs from their durable home (e.g. "Auckland, ' +
+          'New Zealand" while traveling). Transient — not saved to the profile; just unions into the ' +
+          'situational region for THIS batch so local news surfaces while away.',
+      ),
   },
-  async ({ articles }) => {
+  async ({ articles, current_location }) => {
     const profile = repo.loadProfile();
     if (!profile) {
       return err('No profile. Call update_profile first.');
@@ -190,7 +205,7 @@ server.tool(
       publishedAt: a.published_at ? Date.parse(a.published_at) || undefined : undefined,
     }));
     const normalized = normalizeArticles(raw, { location: profile.userContext.location, topics });
-    return ok(ingest(profile, normalized, articles.length));
+    return ok(ingest(profile, normalized, articles.length, current_location));
   },
 );
 
@@ -203,8 +218,12 @@ server.tool(
   {
     queries: z.array(z.string()).min(1).describe('Search queries, one per intent. Capped at 5.'),
     time_range: z.string().optional().describe('Window hint: 1d / 1w / 1m / 1y. Defaults to 1w.'),
+    current_location: z
+      .string()
+      .optional()
+      .describe('Transient current location if away from home; unions into situational region.'),
   },
-  async ({ queries, time_range }) => {
+  async ({ queries, time_range, current_location }) => {
     const profile = repo.loadProfile();
     if (!profile) {
       return err('No profile. Call update_profile first.');
@@ -226,7 +245,7 @@ server.tool(
       .slice(0, 5)
       .map((q) => ({ query: q, timeRange: time_range ?? '1w' }));
     const articles = await provider.search(searchQueries);
-    return ok(ingest(profile, articles, searchQueries.length));
+    return ok(ingest(profile, articles, searchQueries.length, current_location));
   },
 );
 

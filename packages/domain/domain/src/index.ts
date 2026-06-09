@@ -3,7 +3,9 @@ export type { Brief, Concentration } from './brief.ts';
 export type { AxisHit, ImpactScore, MatchType, ReachabilitySeed } from './impact.ts';
 export type {
   Axis,
+  AxisGap,
   Profile,
+  ProfileGaps,
   SituationalContext,
   SystemicCategory,
   UserContext,
