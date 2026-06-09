@@ -260,18 +260,22 @@ server.tool(
     'FIND THE THROUGHLINE FIRST: the causal thread — often a single upstream force — that links the ' +
     "day's items across axes (e.g. one oil shock rippling to the user's region inflation AND, via " +
     'the Fed, to their growth stocks). The seeds make these links explicit — use them. Tell the ' +
-    'brief as THAT STORY, not as disconnected buckets. Structure: (H) dated header + a lede that ' +
-    'states the throughline; (1) numbered THESES as movements of that story — each groups related ' +
-    'radar items, leads with the takeaway, renders the causal chain from the seeds (WHY it reaches ' +
-    'the user: keyword=direct, reach=causal-upstream, situational=region/systemic), surfaces the ' +
-    'tension/stakes, and closes with what-to-watch; (2) MACRO / SITUATIONAL — the broad/thin band ' +
-    '(region + systemic shocks); (3) CONCENTRATION — read the news Effective-N: is the lens wide or ' +
-    'narrowing onto one axis?; (4) a dated CATALYSTS line drawn from the items themselves. Write ' +
-    'with narrative momentum and a point of view — a dry recitation of headlines is the failure ' +
-    'mode; the value is the connective tissue between stories. OPTIONAL: IF firma or memex happen ' +
-    'to be connected you MAY pull their numbers to deepen a cluster, but that is a bonus, never ' +
-    'required. The radar auto-rotates — items shown recently are demoted so each brief surfaces ' +
-    'newer ones. Run ingest_news first if stale.',
+    'brief as THAT STORY, not as disconnected buckets. Structure: (H) dated header + a lede stating ' +
+    'the throughline; (1) numbered THESES, each following the arc — set up the conventional read, ' +
+    'then CRACK it with the anomaly (a counterintuitive hook); dissect the mechanism as a causal ' +
+    'waterfall from the seeds (one upstream force → its transmissions; keyword=direct, ' +
+    'reach=causal-upstream, situational=region/systemic); anchor to a precedent where it sharpens ' +
+    '("resembles X, but the decisive difference is Y"); converge on the SINGLE variable to watch; ' +
+    'then BALANCE it — the counter-current / what would break the thesis (mandatory, never ' +
+    'one-sided); and close with a concrete one-line judgment, not "let\'s watch". Land hard ideas ' +
+    'with an everyday analogy; anchor each claim in a number from the items themselves. (2) MACRO / ' +
+    'SITUATIONAL — the broad/thin band (region + systemic shocks). (3) CONCENTRATION — read the ' +
+    'news Effective-N: is the lens widening or narrowing onto one axis (the diversification-illusion ' +
+    'check)? (4) a dated CATALYSTS line from the items. Take a view — a dry headline recitation or a ' +
+    'hedge-laden "depends" ending is the failure mode. OPTIONAL: IF firma or memex happen to be ' +
+    'connected you MAY pull their numbers to deepen a cluster, but that is a bonus, never required. ' +
+    'The radar auto-rotates — items shown recently are demoted so each brief surfaces newer ones. ' +
+    'Run ingest_news first if stale.',
   {},
   async () => {
     const profile = repo.loadProfile();
