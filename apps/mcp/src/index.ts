@@ -235,9 +235,15 @@ server.tool(
   'Assemble the two-layer brief from the ledger (no web fetch): [radar] reachability-scored news ' +
     'toward the user + [world] top global headlines (shown regardless of relevance) + the ' +
     'Effective-N concentration meter. Render the causal-chain narrative yourself from each ' +
-    "article's impact.seeds; synthesize the prose. The radar auto-rotates — articles shown in a " +
-    'recent brief are demoted (not dropped) so each brief surfaces newer items. Run ingest_news ' +
-    'first if the ledger is stale.',
+    "article's impact.seeds; synthesize the prose as a REPORT. Go deep, not shallow — a bare " +
+    '"this reaches you" line is not enough: (1) group related radar items into a single thesis ' +
+    'rather than listing them; (2) for the top reachability clusters, pull the relevant federated ' +
+    'drill-down — firma (show_concentration / show_risk / simulate_scenario) for asset items, memex ' +
+    'for career/knowledge — and quantify the exposure with real numbers: position sizes, ' +
+    'correlations, concentration (compare firma portfolio Effective-N vs skope news Effective-N), ' +
+    'cross-factor tensions; (3) end each cluster with a so-what / what-to-watch. The radar ' +
+    'auto-rotates — articles shown in a recent brief are demoted (not dropped) so each brief ' +
+    'surfaces newer items. Run ingest_news first if the ledger is stale.',
   {},
   async () => {
     const profile = repo.loadProfile();
