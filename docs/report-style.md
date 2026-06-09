@@ -46,8 +46,20 @@ After the theses: **Macro/Situational** (the broad/thin band), a **Concentration
 Effective-N — is the lens widening or narrowing onto one axis? the diversification-illusion check),
 and a dated **Catalysts** line drawn from the items.
 
+## Voice: explanatory, not telegraphic
+
+The arc above is **invisible scaffolding** — never print its steps as labels ("통념 / 메커니즘 / 판정").
+Write flowing prose a reader can follow with **zero prior context**: one idea per sentence, define
+each piece of jargon the instant it appears (supercore, dot plot, index inclusion…), and land it with
+an everyday analogy. Explain the mechanism like a smart friend talking through it, not a filled
+template. The carrera essays read clearly *because* they walk each step ("refrigerated diesel trucks
+move fresh food, so fuel prices hit groceries directly"). **Depth should make the piece CLEARER as it
+goes, not denser.** Compression that assumes context is the cardinal sin (high cognitive load).
+
 ## Failure modes (anti-patterns)
 
+- Telegraphic labeled shorthand / fragments crammed under step labels (the cardinal sin — unreadable).
+- Undefined jargon; mechanism leaps the reader can't follow without prior context.
 - Dry headline recitation with no connective tissue (no throughline).
 - Disconnected buckets — each item analyzed alone (violates P1/P4).
 - One-sided thesis — no counter-current (skips ⑦).

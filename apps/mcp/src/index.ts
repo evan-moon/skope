@@ -267,8 +267,13 @@ server.tool(
     'reach=causal-upstream, situational=region/systemic); anchor to a precedent where it sharpens ' +
     '("resembles X, but the decisive difference is Y"); converge on the SINGLE variable to watch; ' +
     'then BALANCE it — the counter-current / what would break the thesis (mandatory, never ' +
-    'one-sided); and close with a concrete one-line judgment, not "let\'s watch". Land hard ideas ' +
-    'with an everyday analogy; anchor each claim in a number from the items themselves. (2) MACRO / ' +
+    'one-sided); and close with a concrete one-line judgment, not "let\'s watch". CRUCIAL — write ' +
+    'flowing EXPLANATORY prose a reader can follow cold, with zero prior context: the arc is ' +
+    'INVISIBLE scaffolding, NEVER printed as labels ("통념/메커니즘/판정", "thesis/mechanism"); walk ' +
+    'each step one idea per sentence, define any jargon the instant it appears (supercore, dot plot, ' +
+    'index inclusion…) and land it with an everyday analogy; explain the mechanism like a smart ' +
+    'friend talking, not a filled template. Telegraphic labeled shorthand and undefined jargon are ' +
+    'the failure mode — depth means it gets CLEARER as it goes, not denser. (2) MACRO / ' +
     'SITUATIONAL — the broad/thin band (region + systemic shocks). (3) CONCENTRATION — read the ' +
     'news Effective-N: is the lens widening or narrowing onto one axis (the diversification-illusion ' +
     'check)? (4) a dated CATALYSTS line from the items. Take a view — a dry headline recitation or a ' +
