@@ -12,3 +12,11 @@ export type {
 } from './profile.ts';
 export { MAX_AXES } from './profile.ts';
 export type { SearchProvider, SearchQuery } from './search.ts';
+export type {
+  ConcentrationGate,
+  HotAxis,
+  HotEntity,
+  ReadingSignal,
+  StaleAxis,
+  UnmatchedRead,
+} from './signal.ts';

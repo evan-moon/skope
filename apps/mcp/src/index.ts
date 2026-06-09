@@ -296,5 +296,29 @@ server.tool(
   },
 );
 
+server.tool(
+  'reading_signal',
+  'The "living profile" substrate: deterministic patterns in what the user actually READ over a ' +
+    'window (default 14d). Use it to keep the profile alive — but honor the gates, do not blindly ' +
+    'strengthen what was read (that rebuilds the echo chamber). Fields: hotByReachAnchor (reads that ' +
+    'entered via a causal anchor → the strongest case to PROMOTE that anchor to a keyword; prefer ' +
+    'this over weight changes); hotByEntity / hotByAxis (with exposure denominator); staleAxes (low ' +
+    'reads despite real exposure → downweight toward the general axis, never toward a hot axis); ' +
+    'unmatchedReads (reads with no interest-axis path → a new-interest candidate, YOU name the topic ' +
+    'and add it as a keyword on an EXISTING axis, since the 6-axis cap leaves little room); ' +
+    'concentrationGate (only act on strengthening when safeToStrengthen is true). Write durable ' +
+    'inferences back to memex with a derived-from:skope tag.',
+  {
+    window_days: z.number().optional().describe('Lookback window in days. Defaults to 14.'),
+  },
+  async ({ window_days }) => {
+    const profile = repo.loadProfile();
+    if (!profile) {
+      return err('No profile. Call update_profile first.');
+    }
+    return ok(repo.readingSignal(window_days ?? 14));
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);

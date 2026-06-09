@@ -1,8 +1,24 @@
 import { openDb, type SkopeDb, schema } from '@skope/db';
-import type { Article, Profile, ScoredArticle, UserContext } from '@skope/domain';
+import type {
+  Article,
+  ConcentrationGate,
+  HotEntity,
+  Profile,
+  ReadingSignal,
+  ScoredArticle,
+  UserContext,
+} from '@skope/domain';
 import { contentKey, daysAgo } from '@skope/utils';
-import type { AxisImpactTotals } from '@skope/watch';
-import { and, gte, inArray, sql } from 'drizzle-orm';
+import { type AxisImpactTotals, concentration } from '@skope/watch';
+import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+
+/** Read-signal rule constants (the deterministic gates the orchestrator must honor). */
+const HEALTHY_EFFECTIVE_N = 2.5;
+const PROMOTE_MIN_READS = 3;
+const PROMOTE_MIN_DAYS = 2;
+const STALE_MIN_EXPOSURE = 0.1;
+/** Virtual scoring axes that are not user interests — excluded from entity/stale/unmatched logic. */
+const VIRTUAL_AXES = new Set(['geo', 'situational']);
 
 const {
   profileAxes,
@@ -210,6 +226,160 @@ export class Repo {
       }
     }
     return map;
+  }
+
+  /**
+   * The "living profile" behavioral substrate: deterministic patterns in what the user READ over the
+   * window (interactions ⋈ article_impacts). Emits Effective-N-gated recommendations, not raw counts —
+   * the orchestrator names topics and decides whether to mutate the profile. See ReadingSignal.
+   */
+  readingSignal(windowDays = 14): ReadingSignal {
+    const profile = this.loadProfile();
+    const interestAxisIds = new Set(
+      (profile?.axes ?? [])
+        .filter((a) => a.id !== 'general' && !VIRTUAL_AXES.has(a.id))
+        .map((a) => a.id),
+    );
+
+    const axisTotals = this.axisTotals(windowDays);
+    const totalExposure = axisTotals.reduce((s, t) => s + t.total, 0) || 1;
+    const exposureByAxis = new Map(axisTotals.map((t) => [t.axisId, t.total / totalExposure]));
+    const conc = concentration(axisTotals);
+    const gate: ConcentrationGate = {
+      effectiveN: conc.effectiveN,
+      safeToStrengthen: conc.effectiveN >= HEALTHY_EFFECTIVE_N,
+    };
+
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
+    const reads = this.db
+      .select()
+      .from(interactions)
+      .where(and(eq(interactions.action, 'read'), gte(interactions.timestamp, since)))
+      .all();
+    const readHashes = reads.map((r) => r.urlHash);
+    const dayOf = new Map<string, string>();
+    for (const r of reads) {
+      if (r.timestamp) {
+        dayOf.set(r.urlHash, r.timestamp.toISOString().slice(0, 10));
+      }
+    }
+
+    type Agg = {
+      entity: string;
+      axisId: string;
+      matchType: string;
+      hashes: Set<string>;
+      days: Set<string>;
+    };
+    const byEntity = new Map<string, Agg>();
+    const axisHashes = new Map<string, Set<string>>();
+    const hashHitInterest = new Set<string>();
+
+    if (readHashes.length > 0) {
+      const impacts = this.db
+        .select()
+        .from(articleImpacts)
+        .where(inArray(articleImpacts.urlHash, readHashes))
+        .all();
+      for (const imp of impacts) {
+        const ah = axisHashes.get(imp.axisId) ?? new Set<string>();
+        ah.add(imp.urlHash);
+        axisHashes.set(imp.axisId, ah);
+        if (interestAxisIds.has(imp.axisId)) {
+          hashHitInterest.add(imp.urlHash);
+        }
+        if (!imp.matchSeed || !interestAxisIds.has(imp.axisId)) {
+          continue;
+        }
+        const seed = JSON.parse(imp.matchSeed) as { entity: string; matchType: string };
+        const key = `${seed.entity} ${imp.axisId}`;
+        const agg = byEntity.get(key) ?? {
+          entity: seed.entity,
+          axisId: imp.axisId,
+          matchType: seed.matchType,
+          hashes: new Set<string>(),
+          days: new Set<string>(),
+        };
+        agg.hashes.add(imp.urlHash);
+        const d = dayOf.get(imp.urlHash);
+        if (d) {
+          agg.days.add(d);
+        }
+        if (seed.matchType === 'keyword') {
+          agg.matchType = 'keyword'; // a direct hit dominates a reach hit for the same entity
+        }
+        byEntity.set(key, agg);
+      }
+    }
+
+    const ranked = [...byEntity.values()].sort((a, b) => b.hashes.size - a.hashes.size);
+    const hotByEntity: HotEntity[] = ranked
+      .slice(0, 10)
+      .map((a) => ({
+        entity: a.entity,
+        axisId: a.axisId,
+        reads: a.hashes.size,
+        days: a.days.size,
+      }));
+    const hotByReachAnchor: HotEntity[] = ranked
+      .filter((a) => a.matchType === 'reach')
+      .slice(0, 10)
+      .map((a) => {
+        const reads = a.hashes.size;
+        const days = a.days.size;
+        const promote = reads >= PROMOTE_MIN_READS && days >= PROMOTE_MIN_DAYS;
+        return {
+          entity: a.entity,
+          axisId: a.axisId,
+          reads,
+          days,
+          ...(promote ? { recommend: 'promote_to_keyword' } : {}),
+        };
+      });
+
+    const hotByAxis = [...axisHashes.entries()]
+      .map(([axisId, hs]) => ({
+        axisId,
+        reads: hs.size,
+        exposure: exposureByAxis.get(axisId) ?? 0,
+      }))
+      .sort((a, b) => b.reads - a.reads);
+
+    const staleAxes = [...interestAxisIds]
+      .filter(
+        (id) =>
+          (axisHashes.get(id)?.size ?? 0) === 0 &&
+          (exposureByAxis.get(id) ?? 0) >= STALE_MIN_EXPOSURE,
+      )
+      .map((id) => ({
+        axisId: id,
+        reads: 0,
+        exposure: exposureByAxis.get(id) ?? 0,
+        recommend: 'downweight_to_general',
+      }));
+
+    let unmatchedReads: ReadingSignal['unmatchedReads'] = [];
+    const candidates = readHashes.filter((h) => !hashHitInterest.has(h));
+    if (candidates.length > 0) {
+      const rows = this.db
+        .select()
+        .from(articlesSeen)
+        .where(inArray(articlesSeen.urlHash, candidates))
+        .all();
+      unmatchedReads = rows
+        .slice(0, 10)
+        .map((a) => ({ urlHash: a.urlHash, title: a.title, source: a.source }));
+    }
+
+    return {
+      windowDays,
+      hotByReachAnchor,
+      hotByEntity,
+      hotByAxis,
+      staleAxes,
+      unmatchedReads,
+      concentrationGate: gate,
+    };
   }
 
   markRead(urlHashes: string[]): void {

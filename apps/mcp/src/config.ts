@@ -50,5 +50,17 @@ export const SERVER_INSTRUCTIONS =
   'userContext.location fresh from conversation/memex via update_profile — the current location can ' +
   'differ from home, and a stale one hides the news that matters where the user actually is. ' +
   'Search the web yourself, call ingest_news, then get_brief (its radar auto-rotates already-shown ' +
-  'items down). Only fall back to scan_news (Tavily) if you have no web search of your own. If a ' +
-  'profile has empty reachAnchors, infer a few per axis and offer to save them via update_profile.';
+  'items down). Only fall back to scan_news (Tavily) if you have no web search of your own. ' +
+  'LIVING PROFILE — never hand-assemble what the system can build repeatably. On show_profile, read ' +
+  '`gaps`. If needsOnboarding, build the profile from FEDERATION first, not from your assumptions: ' +
+  'read firma (portfolio → asset keywords + macro reachAnchors, tag source "mcp://firma/portfolio") ' +
+  'and memex (career/knowledge interests + the durable HOME location, tag "mcp://memex"); fill what ' +
+  'remains from the live conversation; generate reachAnchors per axis; then update_profile ' +
+  '(auto-apply) and report what you filled, flagging any low-confidence guess (e.g. an unidentified ' +
+  'holding) rather than inventing it. Periodically call reading_signal to drift the profile from ' +
+  'behavior: PROMOTE hot reachAnchors to keywords (prefer this to weight changes), add an ' +
+  'unmatchedReads topic as a keyword on an EXISTING axis (the 6-axis cap leaves ~2 free — do not ' +
+  'spend axes casually), and downweight a staleAxis toward the general axis (never toward a hot ' +
+  'one) — but change weights only when concentrationGate.safeToStrengthen is true. Write durable ' +
+  'interest inferences back to memex tagged derived-from:skope, and ignore skope-derived inferences ' +
+  'when re-seeding so memex never becomes an echo amplifier.';
