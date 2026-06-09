@@ -6,6 +6,7 @@ export type {
   AxisGap,
   Profile,
   ProfileGaps,
+  RegionToken,
   SituationalContext,
   SystemicCategory,
   UserContext,

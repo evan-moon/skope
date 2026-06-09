@@ -12,7 +12,10 @@ const article = (title: string, over: Partial<Article> = {}): Article => ({
 });
 
 const nzContext: SituationalContext = {
-  regionTokens: ['new zealand', 'auckland'],
+  regionTokens: [
+    { token: 'new zealand', strength: 0.85 },
+    { token: 'auckland', strength: 1 },
+  ],
   systemic: [
     { id: 'natural-disaster', keywords: ['earthquake', 'tsunami'] },
     { id: 'sanctions', keywords: ['sanctions', 'embargo'] },
@@ -87,5 +90,18 @@ describe('situational reachability (broad/thin band)', () => {
     );
     expect(radar).toHaveLength(1);
     expect(radar[0].impact.total).toBeGreaterThan(0);
+  });
+
+  it('region proximity decays into the seed strength — local city outranks the wider country', () => {
+    const local = scoreArticle(
+      article('Auckland council passes new budget'),
+      [],
+      undefined,
+      nzContext,
+    );
+    const wider = scoreArticle(article('New Zealand exports rise'), [], undefined, nzContext);
+    expect(local.seeds.find((s) => s.entity === 'auckland')?.strength).toBe(1);
+    expect(wider.seeds.find((s) => s.entity === 'new zealand')?.strength).toBe(0.85);
+    expect(local.total).toBeGreaterThan(wider.total);
   });
 });

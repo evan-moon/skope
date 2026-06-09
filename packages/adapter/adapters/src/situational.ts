@@ -15,28 +15,40 @@ import { SYSTEMIC_CATEGORIES } from '@skope/source-trust';
  * unioned into the region tokens. No home/current split in the profile — current location is live
  * context (the orchestrator's job), not a durable ledger fact.
  */
+/** Proximity strengths by hierarchy level — local news outranks far-region news. */
+const REGION_LOCAL = 1.0;
+const REGION_COUNTRY = 0.85;
+const REGION_BLOC = 0.7;
+
 export function buildSituationalContext(
   userContext: UserContext,
   currentLocation?: string,
 ): SituationalContext {
-  const tokens = new Set<string>();
-  const addLocation = (loc: string) => {
-    for (const part of loc.split(',')) {
-      const t = part.trim().toLowerCase();
-      if (t.length > 0) {
-        tokens.add(t);
-      }
+  // token -> best (highest) proximity strength seen for it
+  const tokens = new Map<string, number>();
+  const add = (raw: string, strength: number) => {
+    const t = raw.trim().toLowerCase();
+    if (t.length > 0) {
+      tokens.set(t, Math.max(tokens.get(t) ?? 0, strength));
     }
+  };
+  // A free-text location is "City, Country": the first part is local (closest), the rest country.
+  const addLocation = (loc: string) => {
+    const parts = loc
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    parts.forEach((p, i) => add(p, i === 0 ? REGION_LOCAL : REGION_COUNTRY));
   };
   addLocation(userContext.location);
   if (userContext.region) {
-    tokens.add(userContext.region.trim().toLowerCase());
+    add(userContext.region, REGION_BLOC);
   }
   if (currentLocation) {
     addLocation(currentLocation);
   }
   return {
-    regionTokens: [...tokens],
+    regionTokens: [...tokens].map(([token, strength]) => ({ token, strength })),
     systemic: SYSTEMIC_CATEGORIES.map((c) => ({ id: c.id, keywords: [...c.keywords] })),
   };
 }

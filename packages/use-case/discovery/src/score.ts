@@ -39,6 +39,8 @@ const GEO_WEIGHT = 0.15;
 const SITUATIONAL_AXIS = 'situational';
 /** Weight of a situational path. Low (broad/thin), but ADDITIVE so it co-occurs with personal hits. */
 const SITUATIONAL_WEIGHT = 0.15;
+/** Strength of a systemic-category match — a global-but-relevant shock, between country and bloc. */
+const SYSTEMIC_STRENGTH = 0.8;
 
 function haystack(article: Article): string {
   return `${article.title} ${article.snippet ?? ''}`.toLowerCase();
@@ -127,13 +129,15 @@ function geoSeedsFor(article: Article, location?: string): ReachabilitySeed[] {
 function seedsForSituational(article: Article, ctx: SituationalContext): ReachabilitySeed[] {
   const text = haystack(article);
   const seeds: ReachabilitySeed[] = [];
-  for (const token of ctx.regionTokens) {
-    if (keywordMatches(text, token.toLowerCase().trim())) {
+  // Region match carries its own proximity strength (city > country > bloc) so local news outranks
+  // far-region news within the situational band.
+  for (const region of ctx.regionTokens) {
+    if (keywordMatches(text, region.token.toLowerCase().trim())) {
       seeds.push({
         axisId: SITUATIONAL_AXIS,
-        entity: token,
+        entity: region.token,
         matchType: 'situational',
-        strength: STRENGTH.situational,
+        strength: region.strength,
       });
     }
   }
@@ -143,7 +147,7 @@ function seedsForSituational(article: Article, ctx: SituationalContext): Reachab
         axisId: SITUATIONAL_AXIS,
         entity: cat.id,
         matchType: 'situational',
-        strength: STRENGTH.situational,
+        strength: SYSTEMIC_STRENGTH,
       });
     }
   }
@@ -187,10 +191,10 @@ export function scoreArticle(
     const sitSeeds = seedsForSituational(article, situational);
     if (sitSeeds.length > 0) {
       seeds.push(...sitSeeds);
-      hits.push({
-        axisId: SITUATIONAL_AXIS,
-        contribution: SITUATIONAL_WEIGHT * STRENGTH.situational * tierFactor,
-      });
+      // Best matched strength wins: a local-city region hit (1.0) outranks a far bloc hit (0.7) or a
+      // systemic category (0.8), so proximity flows through to the situational contribution.
+      const best = Math.max(...sitSeeds.map((s) => s.strength));
+      hits.push({ axisId: SITUATIONAL_AXIS, contribution: SITUATIONAL_WEIGHT * best * tierFactor });
     }
   }
 

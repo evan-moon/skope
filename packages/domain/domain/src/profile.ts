@@ -60,15 +60,22 @@ export interface SystemicCategory {
   keywords: string[];
 }
 
+/** A region the user is exposed to, with a proximity strength: closer (city) > farther (bloc). */
+export interface RegionToken {
+  token: string;
+  /** 0..1 proximity strength — local city ~1.0, country ~0.85, bloc ~0.7. Local news outranks far. */
+  strength: number;
+}
+
 /**
  * The deterministic inputs to *situational* reachability (the broad/thin band). Built by the adapter
- * layer from UserContext (region tokens) + the static systemic-category enum + industry tags, then
- * injected into scoring. skope matches these additively (a systemic shock reaches you even when a
- * personal axis also matched) — distinct from the geo *floor* which only fires when nothing matched.
+ * layer from UserContext (region tokens, proximity-weighted) + the static systemic-category enum,
+ * then injected into scoring. skope matches these additively (a systemic shock reaches you even when
+ * a personal axis also matched) — distinct from the geo *floor* which only fires when nothing matched.
  */
 export interface SituationalContext {
-  /** Location/region tokens the user is structurally exposed to, e.g. ["new zealand", "auckland"]. */
-  regionTokens: string[];
+  /** Region tokens with proximity strength, e.g. [{token:"seoul",strength:1},{token:"korea",strength:0.85}]. */
+  regionTokens: RegionToken[];
   /** Curated systemic categories — the closed whitelist that keeps the broad band from a firehose. */
   systemic: SystemicCategory[];
 }
