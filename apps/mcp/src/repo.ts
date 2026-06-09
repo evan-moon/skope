@@ -313,14 +313,12 @@ export class Repo {
     }
 
     const ranked = [...byEntity.values()].sort((a, b) => b.hashes.size - a.hashes.size);
-    const hotByEntity: HotEntity[] = ranked
-      .slice(0, 10)
-      .map((a) => ({
-        entity: a.entity,
-        axisId: a.axisId,
-        reads: a.hashes.size,
-        days: a.days.size,
-      }));
+    const hotByEntity: HotEntity[] = ranked.slice(0, 10).map((a) => ({
+      entity: a.entity,
+      axisId: a.axisId,
+      reads: a.hashes.size,
+      days: a.days.size,
+    }));
     const hotByReachAnchor: HotEntity[] = ranked
       .filter((a) => a.matchType === 'reach')
       .slice(0, 10)
@@ -345,7 +343,9 @@ export class Repo {
       }))
       .sort((a, b) => b.reads - a.reads);
 
-    const staleAxes = [...interestAxisIds]
+    // Staleness is RELATIVE to reading activity: with zero reads in the window there's no behavioral
+    // signal, so nothing is "stale" (otherwise a brand-new user with no reads flags every axis).
+    const staleAxes = (readHashes.length === 0 ? [] : [...interestAxisIds])
       .filter(
         (id) =>
           (axisHashes.get(id)?.size ?? 0) === 0 &&
