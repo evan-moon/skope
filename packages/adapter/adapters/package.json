@@ -13,12 +13,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@skope/domain": "workspace:*",
     "@skope/source-trust": "workspace:*",
     "@skope/tavily": "workspace:*",
     "@skope/utils": "workspace:*"
   },
   "devDependencies": {
-    "@skope/domain": "workspace:*",
     "tsup": "^8.4.0",
     "typescript": "^5"
   }

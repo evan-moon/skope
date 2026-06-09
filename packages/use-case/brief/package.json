@@ -13,10 +13,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@skope/domain": "workspace:*",
     "@skope/watch": "workspace:*"
   },
   "devDependencies": {
-    "@skope/domain": "workspace:*",
     "tsup": "^8.4.0",
     "typescript": "^5"
   }
