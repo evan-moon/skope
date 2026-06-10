@@ -69,29 +69,31 @@ export class Repo {
   }
 
   saveProfile(profile: Profile): void {
-    this.db.delete(profileAxes).run();
-    for (const a of profile.axes) {
-      this.db
-        .insert(profileAxes)
-        .values({
-          id: a.id,
-          label: a.label,
-          weight: a.weight,
-          keywords: JSON.stringify(a.keywords),
-          reachAnchors: JSON.stringify(a.reachAnchors ?? []),
-          source: a.source ?? null,
-        })
-        .run();
-    }
-    this.setMeta('user_context', JSON.stringify(profile.userContext));
-    if (profile.lastScan !== undefined) {
-      this.setMeta('last_scan', String(profile.lastScan));
-    }
+    // Delete-then-insert over the single source of truth: one transaction, or a crash between the
+    // two leaves the user with no profile at all.
+    this.db.transaction((tx) => {
+      tx.delete(profileAxes).run();
+      for (const a of profile.axes) {
+        tx.insert(profileAxes)
+          .values({
+            id: a.id,
+            label: a.label,
+            weight: a.weight,
+            keywords: JSON.stringify(a.keywords),
+            reachAnchors: JSON.stringify(a.reachAnchors ?? []),
+            source: a.source ?? null,
+          })
+          .run();
+      }
+      this.setMeta('user_context', JSON.stringify(profile.userContext), tx);
+      if (profile.lastScan !== undefined) {
+        this.setMeta('last_scan', String(profile.lastScan), tx);
+      }
+    });
   }
 
-  private setMeta(key: string, value: string): void {
-    this.db
-      .insert(profileMeta)
+  private setMeta(key: string, value: string, db: Pick<SkopeDb, 'insert'> = this.db): void {
+    db.insert(profileMeta)
       .values({ key, value })
       .onConflictDoUpdate({ target: profileMeta.key, set: { value } })
       .run();

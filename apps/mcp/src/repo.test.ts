@@ -64,6 +64,25 @@ afterEach(() => {
   }
 });
 
+describe('repo.saveProfile', () => {
+  it('is atomic: a failing axis insert leaves the previous profile untouched', () => {
+    const broken: Profile = {
+      version: 'v2',
+      userContext: { location: 'Busan, Korea', languages: ['ko'] },
+      axes: [
+        { id: 'dup', label: 'A', weight: 0.5, keywords: [], reachAnchors: [] },
+        { id: 'dup', label: 'B', weight: 0.5, keywords: [], reachAnchors: [] }, // PK violation
+      ],
+    };
+
+    expect(() => repo.saveProfile(broken)).toThrow();
+
+    const after = repo.loadProfile();
+    expect(after?.axes.map((a) => a.id).sort()).toEqual(['asset', 'career', 'general']);
+    expect(after?.userContext?.location).toBe('Seoul, Korea');
+  });
+});
+
 describe('repo.readingSignal', () => {
   it('reports no stale axes and empty hot lists when nothing has been read', () => {
     const s = repo.readingSignal();
