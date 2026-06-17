@@ -1,6 +1,6 @@
 {
   "name": "@evan-moon/skope",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "mcpName": "io.github.evan-moon/skope",
   "type": "module",
   "description": "Local-first, AI-native personalized news intelligence — a lens + watcher on the world. Built-in MCP server for Claude Desktop.",

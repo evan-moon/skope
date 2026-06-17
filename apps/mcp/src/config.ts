@@ -27,7 +27,14 @@ export function getTavilyKey(): string | undefined {
   return process.env.SKOPE_TAVILY_API_KEY ?? readConfig().tavily_api_key;
 }
 
-export const SKOPE_VERSION = '0.1.0';
+declare const __SKOPE_VERSION__: string;
+export const SKOPE_VERSION = ((): string => {
+  try {
+    return __SKOPE_VERSION__;
+  } catch {
+    return '0.0.0-dev';
+  }
+})();
 
 export const SERVER_INSTRUCTIONS =
   'skope is a personalized news lens. It keeps only what has a causal path to the user ' +

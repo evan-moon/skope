@@ -6,12 +6,21 @@ import pc from 'picocolors';
 import { mcpInstallCommand } from './commands/mcp.ts';
 import { readConfig, writeConfig } from './config.ts';
 
+declare const __SKOPE_VERSION__: string;
+const VERSION = (() => {
+  try {
+    return __SKOPE_VERSION__;
+  } catch {
+    return '0.0.0-dev';
+  }
+})();
+
 const program = new Command();
 
 program
   .name('skope')
   .description('Personalized news lens — a safety-net CLI. Analysis lives in the MCP server.')
-  .version('0.1.0');
+  .version(VERSION);
 
 const config = program.command('config').description('Manage local config (~/.skope/config.json)');
 config
